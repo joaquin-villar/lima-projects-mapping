@@ -31,24 +31,26 @@ window.GeneralMap = (function () {
 
         setBaseLayer("satellite");
         
-        // 🟢 SOLO INICIALIZAMOS LA CAPA (Sin barra de herramientas)
+        // 🟢 FIX: Llamamos a la función de setup
         setupDrawingLayer();
         
         loadDistricts(districtsGeoJSON);
 
         map.on('click', (e) => {
-            // Ya no necesitamos chequear si estamos dibujando porque no hay herramientas
             deselectAll();
         });
 
         window.mapOverview = map;
     }
 
-    // 🟢 FUNCIÓN MODIFICADA: Solo crea el contenedor para ver dibujos
+    // 🟢 FUNCIÓN MODIFICADA: Usamos L.LayerGroup para solo visualización
     function setupDrawingLayer() {
-        drawingLayer = new L.FeatureGroup();
+        if (drawingLayer && map.hasLayer(drawingLayer)) {
+             map.removeLayer(drawingLayer);
+        }
+        // 🛑 CAMBIO CRÍTICO: Usamos L.LayerGroup (solo lectura) en lugar de L.FeatureGroup (editable)
+        drawingLayer = new L.LayerGroup(); 
         map.addLayer(drawingLayer);
-        // AQUÍ QUITAMOS: L.Control.Draw y map.addControl(...)
     }
 
     function setBaseLayer(style) {
@@ -132,12 +134,18 @@ window.GeneralMap = (function () {
 
         updateVisuals();
         updateGlobalState();
+        
+        // Limpiamos la capa de dibujo para que el artefacto no se quede
+        if (drawingLayer) drawingLayer.clearLayers();
     }
 
     function deselectAll(updateUI = true) {
         selectedDistricts.clear();
         updateVisuals();
         if(updateUI) updateGlobalState();
+        
+        // Limpiamos la capa de dibujo
+        if (drawingLayer) drawingLayer.clearLayers(); 
     }
 
     function updateVisuals() {

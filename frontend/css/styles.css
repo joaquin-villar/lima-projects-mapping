@@ -400,6 +400,22 @@ body {
 }
 
 /* ==============================================
+   FIX: ELIMINAR RECUADRO NEGRO DE ENFOQUE
+   (Browser Focus Ring)
+============================================== */
+
+/* Quita el borde negro/azul que ponen los navegadores al hacer clic en un vector */
+path.leaflet-interactive:focus {
+    outline: none;
+}
+
+/* Por si acaso, también para el contenedor del mapa */
+.leaflet-container:focus,
+.leaflet-container *:focus {
+    outline: none;
+}
+
+/* ==============================================
    SIDEBAR FORMS & INPUTS
 ============================================== */
 
