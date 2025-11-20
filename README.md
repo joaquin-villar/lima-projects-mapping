@@ -36,7 +36,7 @@ Sigue estos pasos para ejecutar el proyecto en tu computadora:
 
 1. **Clonar el repositorio**
    ```bash
-   git clone https://github.com/joaquin-villar/lima-proyect-mapping.git
+   git clone https://github.com/joaquin-villar/lima-projects-mapping.git
    cd lima-proyect-mapping
    ```
 
