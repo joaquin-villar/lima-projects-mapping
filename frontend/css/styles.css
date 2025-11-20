@@ -1,0 +1,1386 @@
+/* ==============================================
+   GLOBAL RESET & BASE STYLES
+============================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: #0f172a;
+    color: #e5e7eb;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ==============================================
+   HEADER (Title + Tabs)
+============================================== */
+.app-header {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    border-bottom: 2px solid #334155;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    z-index: 100;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    height: 70px;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.app-title {
+    font-size: 24px;
+    font-weight: 700;
+    /* 🟢 NUEVO: Color sólido blanco para mejor legibilidad */
+    color: #fff; 
+    margin: 0;
+    /* 🔴 ELIMINAMOS el degradado del texto, o lo hacemos muy sutil si se desea */
+    /* background: linear-gradient(135deg, #00B4D8 0%, #0096b8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text; */
+}
+
+/* Sidebar Toggle Button */
+.sidebar-toggle-btn {
+    width: 40px;
+    height: 40px;
+    background: #334155;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    
+    /* 🟢 FLEXBOX PARA CENTRAR */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    transition: all 0.3s;
+    margin-right: 16px; /* Espacio entre botón y título */
+    padding: 0; /* Resetear padding nativo */
+}
+
+.sidebar-toggle-btn:hover {
+    background: #475569;
+    transform: scale(1.05);
+}
+
+/* Icono de Hamburguesa (Línea central) */
+.hamburger {
+    width: 20px;
+    height: 2px;
+    background: #00B4D8;
+    position: relative;
+    display: block;
+    transition: all 0.3s;
+}
+
+/* Líneas superior e inferior */
+.hamburger::before,
+.hamburger::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 2px;
+    background: #00B4D8;
+    transition: all 0.3s;
+    left: 0; /* Asegura que empiecen desde la izquierda */
+}
+
+.hamburger::before {
+    top: -6px;
+}
+
+.hamburger::after {
+    bottom: -6px;
+}
+
+/* ESTADOS COLAPSADOS (X) */
+.sidebar.collapsed .hamburger {
+    background: transparent; /* Oculta la del medio */
+}
+
+.sidebar.collapsed .hamburger::before {
+    transform: rotate(45deg);
+    top: 0;
+}
+
+.sidebar.collapsed .hamburger::after {
+    transform: rotate(-45deg);
+    bottom: 0;
+}
+
+/* Tab Navigation */
+.tab-navigation {
+    display: flex;
+    gap: 8px;
+}
+
+.tab-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.3s;
+    position: relative;
+}
+
+.tab-button:hover {
+    color: #e5e7eb;
+    background: rgba(51, 65, 85, 0.5);
+}
+
+.tab-button.active {
+    color: #00B4D8;
+    background: rgba(0, 180, 216, 0.15);
+}
+
+.tab-button.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 3px;
+    background: #00B4D8;
+    border-radius: 2px 2px 0 0;
+}
+
+/* ==============================================
+   MAIN LAYOUT (Sidebar + Content)
+============================================== */
+.main-layout {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* ==============================================
+   SIDEBAR (Retractable)
+============================================== */
+.sidebar {
+    width: 350px;
+    background: #1e293b;
+    border-right: 2px solid #334155;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.2);
+    z-index: 50;
+}
+
+.sidebar.collapsed {
+    width: 0;
+    border-right: none;
+    overflow: hidden;
+}
+
+.sidebar-content {
+    padding: 24px;
+    overflow-y: auto;
+    height: 100%;
+}
+
+.sidebar-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar-content::-webkit-scrollbar-track {
+    background: #1e293b;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb {
+    background: #475569;
+    border-radius: 3px;
+}
+
+.sidebar-section {
+    margin-bottom: 30px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #334155;
+}
+
+.sidebar-section:last-child {
+    border-bottom: none;
+}
+
+.sidebar-heading {
+    font-size: 16px;
+    font-weight: 700;
+    color: #00B4D8;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Forzamos que la lista de proyectos en el sidebar sea vertical */
+#district-projects-list {
+    display: flex;
+    flex-direction: column; /* Uno debajo del otro */
+    gap: 16px;              /* Espacio entre tarjetas */
+    width: 100%;
+}
+
+/* Aseguramos que la tarjeta ocupe todo el ancho disponible */
+#district-projects-list .project-card {
+    width: 100%;
+    margin: 0; /* Reseteamos márgenes si los hubiera */
+}
+
+/* ==============================================
+   CONTENT AREA
+============================================== */
+.content-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #0f172a;
+}
+
+.tab-content {
+    display: none;
+    flex: 1;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.tab-content.active {
+    display: flex;
+}
+
+/* ==============================================
+   MAP CONTROLS
+============================================== */
+.map-controls {
+    background: #1e293b;
+    padding: 16px 24px;
+    border-bottom: 1px solid #334155;
+    display: flex;
+    gap: 24px;
+    align-items: center;
+}
+
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.control-group label {
+    color: #94a3b8;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.map-style-select {
+    padding: 8px 12px;
+    background: #334155;
+    border: 1px solid #475569;
+    border-radius: 6px;
+    color: #e5e7eb;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.map-style-select:focus {
+    outline: none;
+    border-color: #00B4D8;
+}
+
+
+/* Contenedor para cuando hay múltiples distritos */
+.district-pills-container {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    vertical-align: middle;
+    border: none !important;
+    background: transparent !important;
+    padding: 0;
+    margin: 0;
+}
+
+/* Estilo de la etiqueta individual (Pill) */
+.district-label {
+    display: inline-flex;       /* Para alinear texto e ícono */
+    align-items: center;
+    gap: 6px;                   /* Espacio entre nombre y X */
+    color: #00B4D8;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 4px 10px;
+    background: rgba(0, 180, 216, 0.15);
+    border: 1px solid rgba(0, 180, 216, 0.3);
+    border-radius: 20px;
+    white-space: nowrap;
+    cursor: pointer;            /* Indicador de click */
+    transition: all 0.2s ease;  /* Animación suave */
+    user-select: none;          /* Evita seleccionar el texto al hacer click */
+}
+
+/* Efecto al pasar el mouse: Rojo para indicar eliminación */
+.district-label:hover {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    border-color: #ef4444;
+}
+
+/* Pequeña X visual */
+.district-label::after {
+    content: "×"; /* Símbolo de multiplicación */
+    font-size: 16px;
+    line-height: 1;
+    font-weight: 400;
+    opacity: 0.7;
+}
+
+.district-label:hover::after {
+    opacity: 1;
+    font-weight: 700;
+}
+
+/* ==============================================
+   MAP CONTAINERS
+============================================== */
+.map-container {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+}
+
+.map {
+    width: 100%;
+    height: 100%;
+}
+
+/* ==============================================
+   LEAFLET TOOLTIPS (Dark Mode)
+============================================== */
+.custom-tooltip {
+    background-color: #1e293b !important; /* Fondo oscuro */
+    border: 1px solid #00B4D8 !important; /* Borde azul cyan */
+    color: #e5e7eb !important;            /* Texto claro */
+    border-radius: 6px !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3) !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    padding: 4px 8px !important;
+}
+
+/* La "flechita" del tooltip (opcional, Leaflet a veces la pone) */
+.leaflet-tooltip-top:before,
+.leaflet-tooltip-bottom:before,
+.leaflet-tooltip-left:before,
+.leaflet-tooltip-right:before {
+    border-top-color: #00B4D8 !important; /* Colorear la flecha si aparece */
+}
+
+/* ==============================================
+   SIDEBAR FORMS & INPUTS
+============================================== */
+
+.selected-district-display {
+    color: #00B4D8;
+    font-weight: 600;
+    padding: 12px;
+    background: rgba(0, 180, 216, 0.1);
+    border-radius: 6px;
+    text-align: center;
+    margin-bottom: 12px;
+}
+
+.form-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    color: #94a3b8;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 12px;
+    background: #334155;
+    border: 1px solid #475569;
+    border-radius: 6px;
+    color: #e5e7eb;
+    font-size: 14px;
+    font-family: inherit;
+    transition: all 0.3s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #00B4D8;
+    box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.1);
+}
+
+/* FIX: Asegurar que las opciones del select tengan fondo oscuro en el sidebar */
+#new-project-status option {
+    background-color: #1e293b;
+    color: #e5e7eb;
+    padding: 10px;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* ==============================================
+   BUTTONS
+============================================== */
+.action-btn {
+    width: 100%;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.action-btn.primary {
+    background: linear-gradient(135deg, #00B4D8 0%, #0096b8 100%);
+    color: white;
+    box-shadow: 0 4px 6px rgba(0, 180, 216, 0.3);
+}
+
+.action-btn.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 180, 216, 0.4);
+}
+
+.action-btn.secondary {
+    background: #334155;
+    color: #e5e7eb;
+}
+
+.action-btn.secondary:hover {
+    background: #475569;
+}
+
+.action-btn.danger {
+    background: #ef4444;
+    color: white;
+}
+
+.action-btn.danger:hover {
+    background: #dc2626;
+}
+
+/* ==============================================
+   PROJECTS TAB
+============================================== */
+.projects-content {
+    padding: 40px;
+    overflow-y: auto;
+    height: 100%;
+}
+
+.projects-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.projects-content::-webkit-scrollbar-track {
+    background: #0f172a;
+}
+
+.projects-content::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 4px;
+}
+
+.projects-header {
+    margin-bottom: 40px;
+}
+
+.projects-header h1 {
+    font-size: 36px;
+    color: #fff;
+    margin-bottom: 8px;
+}
+
+.projects-header .subtitle {
+    color: #94a3b8;
+    font-size: 16px;
+}
+
+/* 1. GRID DE PROYECTOS (Ajustado para intentar mostrar 3 columnas) */
+.projects-grid {
+    display: grid;
+    /* Bajamos de 350px a 300px para que quepan 3 en pantallas estándar */
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+    align-items: start;
+}
+
+/* 2. TARJETA DE PROYECTO (Layout Flex Vertical) */
+.project-card {
+    background: linear-gradient(135deg, #1e293b 0%, #1e3a52 100%);
+    border-radius: 12px;
+    padding: 24px;
+    border: 2px solid #334155;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    
+    /* 🟢 ESTO EVITA EL SOLAPAMIENTO */
+    display: flex;
+    flex-direction: column; 
+    min-height: 220px; /* Altura mínima para uniformidad */
+}
+
+/* Descripción: Ocupa el espacio disponible y empuja lo de abajo */
+.project-description {
+    color: #94a3b8;
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 20px; /* Espacio seguro antes del meta */
+    flex-grow: 1;        /* Empuja el footer hacia abajo */
+}
+
+/* Meta (Estado y Fecha) */
+.project-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 16px;
+    border-top: 1px solid #334155;
+    font-size: 12px;
+    margin-top: auto; /* Se ancla al fondo de la descripción */
+    flex-wrap: wrap;  /* Si falta espacio, baja la fecha */
+    gap: 10px;
+}
+
+/* Distritos (Pills) */
+.district-badges {
+    margin-top: 12px; /* Espacio claro entre Meta y Distritos */
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+/* Aseguramos que el panel de detalles siga funcionando bien */
+.project-details-section {
+    grid-column: 1 / -1 !important;
+    width: 100%;
+    margin-top: 10px;
+    margin-bottom: 30px;
+    animation: fadeIn 0.3s ease;
+}
+
+.project-card {
+    background: linear-gradient(135deg, #1e293b 0%, #1e3a52 100%);
+    border-radius: 12px;
+    padding: 24px;
+    border: 2px solid #334155;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+}
+
+.project-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #00B4D8 0%, #0096b8 100%);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.project-card:hover {
+    border-color: #00B4D8;
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 180, 216, 0.2);
+}
+
+.project-card:hover::before {
+    opacity: 1;
+}
+
+.project-card.active {
+    border-color: #00B4D8;
+    background: linear-gradient(135deg, #1e3a52 0%, #1e293b 100%);
+}
+
+.project-card.active::before {
+    opacity: 1;
+}
+
+.project-name {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 12px;
+}
+
+.project-description {
+    color: #94a3b8;
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 16px;
+    min-height: 40px;
+}
+
+.project-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 16px;
+    border-top: 1px solid #334155;
+    font-size: 12px;
+}
+
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-badge.active {
+    background: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
+}
+
+.status-badge.completed {
+    background: rgba(59, 130, 246, 0.2);
+    color: #3b82f6;
+}
+
+/* NUEVO: Estado Inactivo */
+.status-badge.inactive {
+    background: rgba(245, 158, 11, 0.2);
+    color: #f59e0b;
+}
+
+.status-badge.archived {
+    background: rgba(107, 114, 128, 0.2);
+    color: #9ca3af;
+}
+
+/* Empty State */
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 80px 20px;
+    color: #64748b;
+}
+
+.empty-icon {
+    font-size: 64px;
+    margin-bottom: 16px;
+}
+
+.empty-state p {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.empty-state small {
+    font-size: 14px;
+    color: #475569;
+}
+
+/* Project Details */
+/* Detalle expandible dentro de la grilla */
+.project-details-section {
+    /* Esto es la clave: ocupa desde la columna 1 hasta la última (-1) */
+    grid-column: 1 / -1; 
+    width: 100%;
+    
+    /* Mantenemos tus estilos visuales previos */
+    margin-top: 20px;
+    margin-bottom: 20px;
+    animation: fadeIn 0.3s ease;
+}
+
+/* Aseguramos que el contenido interno se vea bien */
+.details-card {
+    background: #1e293b;
+    border-radius: 16px;
+    padding: 32px;
+    border: 2px solid #334155;
+    /* Sombra para dar efecto de "capa superior" */
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+}
+
+.details-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #334155;
+}
+
+.details-header h2 {
+    font-size: 24px;
+    color: #fff;
+    margin: 0;
+}
+
+.close-btn {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    background: #334155;
+    border: none;
+    border-radius: 8px;
+    color: #94a3b8;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.close-btn:hover {
+    background: #475569;
+    color: #fff;
+}
+
+.project-info-content {
+    background: #334155;
+    padding: 24px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    border-left: 4px solid #00B4D8;
+}
+
+.project-info-content strong {
+    font-size: 20px;
+    color: #00B4D8;
+    display: block;
+    margin-bottom: 12px;
+}
+
+.project-districts {
+    margin-bottom: 24px;
+}
+
+.project-districts h3 {
+    color: #94a3b8;
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    letter-spacing: 0.5px;
+}
+
+.districts-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.district-badge {
+    padding: 8px 16px;
+    background: rgba(0, 180, 216, 0.2);
+    color: #00B4D8;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.project-actions {
+    display: flex;
+    gap: 12px;
+}
+
+/* ==============================================
+   PROJECT CREATION MODAL - FIXED VERSION
+============================================== */
+
+/* Modal Overlay - Hidden by default */
+.modal-overlay {
+    display: none !important;
+}
+
+.modal-overlay.active {
+    display: flex !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    z-index: 99999 !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+@keyframes fadeIn {
+    from { 
+        opacity: 0; 
+    }
+    to { 
+        opacity: 1; 
+    }
+}
+
+/* Modal Container */
+.modal-container {
+    background: linear-gradient(135deg, #1e293b 0%, #0f1620 100%);
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s ease;
+    border: 1px solid rgba(0, 180, 216, 0.3);
+    position: relative;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Modal Header */
+.modal-header {
+    padding: 24px;
+    border-bottom: 1px solid #334155;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-title {
+    font-size: 22px;
+    font-weight: 600;
+    color: #00B4D8;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.modal-title .lucide {
+    width: 24px;
+    height: 24px;
+}
+
+.modal-close {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 28px;
+    line-height: 1;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.modal-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+/* Modal Body */
+.modal-body {
+    padding: 24px;
+}
+
+.modal-body .form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    color: #e2e8f0;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.form-label.required::after {
+    content: " *";
+    color: #ef4444;
+}
+
+.form-input,
+.form-textarea,
+.form-select {
+    width: 100%;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid #475569;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 14px;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus {
+    outline: none;
+    border-color: #00B4D8;
+    background: rgba(0, 180, 216, 0.05);
+    box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.1);
+}
+
+/* Fix para Dropdowns en Modal */
+.form-select option {
+    background-color: #1e293b; 
+    color: #fff;            
+    padding: 10px;
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.form-help {
+    font-size: 12px;
+    color: #94a3b8;
+    margin-top: 6px;
+}
+
+.district-badge-preview {
+    display: inline-block;
+    background: rgba(0, 180, 216, 0.2);
+    color: #00B4D8;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-top: 8px;
+    border: 1px solid rgba(0, 180, 216, 0.3);
+}
+
+/* Modal Footer */
+.modal-footer {
+    padding: 20px 24px;
+    border-top: 1px solid #334155;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.btn-modal {
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-modal-cancel {
+    background: transparent;
+    color: #94a3b8;
+    border: 1px solid #475569;
+}
+
+.btn-modal-cancel:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+}
+
+.btn-modal-primary {
+    background: linear-gradient(135deg, #00B4D8 0%, #0096b8 100%);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0, 180, 216, 0.3);
+}
+
+.btn-modal-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(0, 180, 216, 0.4);
+}
+
+.btn-modal-primary:active {
+    transform: translateY(0);
+}
+
+/* Scrollbar Styling */
+.modal-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-container::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 0 16px 16px 0;
+}
+
+.modal-container::-webkit-scrollbar-thumb {
+    background: rgba(0, 180, 216, 0.3);
+    border-radius: 4px;
+}
+
+.modal-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 180, 216, 0.5);
+}
+
+/* ==============================================
+   TOAST NOTIFICATIONS
+============================================== */
+.toast-notification {
+    position: fixed;
+    top: 75px;
+    right: 24px;
+    background: linear-gradient(135deg, #1e293b 0%, #0f1620 100%);
+    padding: 16px 24px;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    z-index: 99999;
+    transform: translateX(400px);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid #334155;
+    min-width: 300px;
+}
+
+.toast-notification.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.toast-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #e5e7eb;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.toast-content .lucide {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+/* Success variant */
+.toast-success {
+    border-left: 4px solid #22c55e;
+}
+
+.toast-success .lucide {
+    color: #22c55e;
+}
+
+/* Error variant */
+.toast-error {
+    border-left: 4px solid #ef4444;
+}
+
+.toast-error .lucide {
+    color: #ef4444;
+}
+
+/* Animation for multiple toasts */
+.toast-notification + .toast-notification {
+    margin-top: 12px;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .toast-notification {
+        top: 16px;
+        right: 16px;
+        left: 16px;
+        min-width: auto;
+    }
+}
+
+
+/* ==============================================
+   DISTRICT STATISTICS CARD
+============================================== */
+.district-stats-card {
+    background: linear-gradient(135deg, #1e293b 0%, #0f1620 100%);
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #334155;
+    margin-bottom: 16px;
+}
+
+.stats-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #334155;
+}
+
+.stats-header .lucide {
+    width: 20px;
+    height: 20px;
+    color: #00B4D8;
+}
+
+.stats-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #e5e7eb;
+    margin: 0;
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.stat-item {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid #334155;
+    transition: all 0.2s;
+}
+
+.stat-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateY(-2px);
+}
+
+.stat-item .lucide {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.stat-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 11px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Stat Colors */
+.stat-total .lucide {
+    color: #00B4D8;
+}
+
+.stat-active .lucide {
+    color: #22c55e;
+}
+
+/* NUEVO: Inactivo Color */
+.stat-inactive .lucide {
+    color: #f59e0b; /* Ámbar */
+}
+
+.stat-completed .lucide {
+    color: #3b82f6;
+}
+
+.stat-archived .lucide {
+    color: #9ca3af;
+}
+
+/* Loading Animation */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ==============================================
+   OVERVIEW SIDEBAR STYLES (NUEVO)
+============================================== */
+
+/* 1. La carta grande de Lima */
+.lima-hero-card {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    border: 1px solid #334155;
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 24px; /* Espacio debajo */
+}
+
+.lima-hero-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 4px;
+    background: linear-gradient(90deg, #00B4D8, #0096b8);
+}
+
+.hero-icon {
+    width: 48px;
+    height: 48px;
+    background: rgba(0, 180, 216, 0.1);
+    color: #00B4D8;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+}
+
+.lima-hero-card h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 8px;
+}
+
+.lima-hero-card p {
+    font-size: 13px;
+    color: #94a3b8;
+    line-height: 1.5;
+}
+
+/* 2. La Grilla de Distritos */
+.district-grid-list {
+    display: grid;
+    /* Esto crea columnas automáticas de mínimo 130px */
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); 
+    gap: 10px;
+}
+
+.district-mini-card {
+    background: #334155;       /* Fondo de tarjeta */
+    border: 1px solid #475569; /* Borde sutil */
+    border-radius: 8px;
+    padding: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #e5e7eb;
+    user-select: none;
+}
+
+/* Efecto Hover (Al pasar el mouse) */
+.district-mini-card:hover {
+    background: #475569;
+    border-color: #00B4D8;
+    transform: translateY(-2px);
+    color: #fff;
+}
+
+/* Efecto Activo (Si está seleccionado) */
+.district-mini-card.active {
+    background: rgba(0, 180, 216, 0.15);
+    border-color: #00B4D8;
+    color: #00B4D8;
+    font-weight: 700;
+}
+
+/* ==============================================
+   RESPONSIVE
+============================================== */
+@media (max-width: 1024px) {
+    .header-content {
+        flex-direction: column;
+        height: auto;
+        padding: 16px;
+        gap: 12px;
+    }
+    
+    .tab-navigation {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .sidebar {
+        position: absolute;
+        height: calc(100vh - 70px);
+        z-index: 1000;
+    }
+    
+    .projects-grid {
+        grid-template-columns: 1fr;
+    }
+}

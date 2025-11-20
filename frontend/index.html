@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lima Project Mapping Dashboard</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css">
+
+    <link rel="stylesheet" href="https://unpkg.com/lucide-static/font/lucide.css" />
+
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+
+<body>
+    <header class="app-header">
+        <div class="header-content">
+
+            <div class="header-left">
+                <button id="sidebar-toggle" class="sidebar-toggle-btn">
+                    <span class="hamburger"></span>
+                </button>
+                <h1 class="app-title">
+                    Lima Mapping Dashboard
+                </h1>
+            </div>
+
+            <nav class="tab-navigation">
+                <button class="tab-button active" data-tab="overview">
+                    <i data-lucide="globe-2"></i> Mapa General
+                </button>
+
+                <button class="tab-button" data-tab="detail">
+                    <i data-lucide="map-pin"></i> Vista Detallada
+                </button>
+
+                <button class="tab-button" data-tab="projects">
+                    <i data-lucide="briefcase"></i> Proyectos
+                </button>
+            </nav>
+
+        </div>
+    </header>
+
+    <div class="main-layout">
+
+        <aside id="sidebar" class="sidebar">
+            <div class="sidebar-content">
+
+                <div id="overview-sidebar-section" class="sidebar-section">
+                    
+                    <div class="lima-hero-card">
+                        <div class="hero-icon">
+                            <i data-lucide="map"></i>
+                        </div>
+                        <h2>Lima Mapping Dashboard</h2>
+                        <p>App que permite rastrear y entender los muchos proyectos prometidos en la capital.</p>
+                    </div>
+
+                    <h3 class="sidebar-heading" style="margin-top: 24px;">
+                        <i data-lucide="layout-grid"></i> Distritos
+                    </h3>
+
+                    <div id="overview-districts-list" class="district-grid-list">
+                        <div style="text-align: center; padding: 20px; color: #94a3b8;">
+                            <i data-lucide="loader" style="animation: spin 1s linear infinite;"></i> Cargando...
+                        </div>
+                    </div>
+                </div>
+
+                <div id="district-projects-section" class="sidebar-section" style="display:none;">
+                    <h2 class="sidebar-heading">
+                        <i data-lucide="building-2"></i> Proyectos en este distrito
+                    </h2>
+                    
+                    <div id="district-stats-container"></div>
+
+                    <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 16px; margin-bottom: 20px;">
+                        <button id="btn-new-project-in-district" class="action-btn primary">
+                            <i data-lucide="plus-circle"></i> Nuevo proyecto en este distrito
+                        </button>
+    
+                        <button id="btn-save-drawings" class="action-btn secondary">
+                            <i data-lucide="save"></i> Guardar dibujos en proyecto
+                        </button>
+                    </div>
+
+                    <div id="district-projects-list" class="districts-container"></div>
+                </div>
+
+                <div id="new-project-section" class="sidebar-section" style="display:none;">
+                    <h2 class="sidebar-heading">
+                        <i data-lucide="sparkles"></i> Nuevo Proyecto
+                    </h2>
+
+                    <div class="form-container">
+                        <div class="form-group">
+                            <label>Nombre</label>
+                            <input id="new-project-name" type="text" placeholder="Nombre del proyecto">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Descripción</label>
+                            <textarea id="new-project-desc" rows="3" placeholder="Describe el proyecto..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Distritos</label>
+                            <select id="new-project-districts" multiple size="6" class="multi-select"></select>
+                            <small class="help-text">Selecciona uno o varios distritos (mínimo uno)</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Estado</label>
+                            <select id="new-project-status">
+                                <option value="active">Activo</option>
+                                <option value="inactive">Inactivo</option>
+                                <option value="completed">Completado</option>
+                                <option value="archived">Archivado</option>
+                            </select>
+                        </div>
+
+                        <button id="btn-create-project" class="action-btn primary">
+                            <i data-lucide="plus-circle"></i> Crear Proyecto
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </aside>
+
+
+        <main class="content-area">
+
+            <div id="overview-tab" class="tab-content active">
+                <div class="map-controls">
+                    <div class="control-group">
+                        <label>Estilo:</label>
+                        <select id="map-style-overview" class="map-style-select">
+                            <option value="satellite" selected>Satélite</option>
+                            <option value="streets">Calles</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Distrito(s):</label>
+                        <span id="selected-district-display">Ninguno</span>
+                    </div>
+                </div>
+
+                <div class="map-container">
+                    <div id="map-overview" class="map"></div>
+                </div>
+            </div>
+
+            <div id="detail-tab" class="tab-content">
+                <div class="map-controls">
+                    <div class="control-group">
+                        <label>Estilo:</label>
+                        <select id="map-style-detail" class="map-style-select">
+                            <option value="satellite" selected>Satélite</option>
+                            <option value="streets">Calles</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Distrito(s):</label>
+                        <span id="detail-district-display">Ninguno</span>
+                    </div>
+                </div>
+
+                <div class="map-container">
+                    <div id="map-detail" class="map"></div>
+                </div>
+            </div>
+
+            <div id="projects-tab" class="tab-content">
+                <div class="projects-content">
+
+                    <div class="projects-header">
+                        <h1><i data-lucide="briefcase"></i> Gestión de Proyectos</h1>
+                        <p class="subtitle">Administra tus proyectos de mapeo de Lima & Callao</p>
+                    </div>
+
+                    <div id="project-list" class="projects-grid">
+                        <div class="empty-state">
+                            <div class="empty-icon"><i data-lucide="list"></i></div>
+                            <p>No hay proyectos todavía</p>
+                            <small>Usa el panel lateral para crear tu primer proyecto</small>
+                        </div>
+                    </div>
+
+                    <div id="project-details-section" class="project-details-section" style="display:none;">
+                        <div class="details-card">
+
+                            <div class="details-header">
+                                <h2><i data-lucide="info"></i> Detalles del Proyecto</h2>
+
+                                <button id="btn-close-details" class="close-btn">
+                                    <i data-lucide="x"></i>
+                                </button>
+                            </div>
+
+                            <div id="current-project-info" class="project-info-content"></div>
+
+                            <div class="project-districts">
+                                <h3><i data-lucide="map"></i> Distritos en el Proyecto</h3>
+                                <div id="project-districts" class="districts-container"></div>
+                            </div>
+
+                            <div class="project-actions">
+                                <button id="btn-view-on-map" class="action-btn secondary">
+                                    <i data-lucide="map"></i> Ver en Mapa
+                                </button>
+
+                                <button id="btn-delete-project" class="action-btn danger">
+                                    <i data-lucide="trash"></i> Eliminar Proyecto
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </main>
+
+    </div> <div id="project-modal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <i data-lucide="map-pin"></i> Nuevo Proyecto
+                </h2>
+                <button class="modal-close" id="modal-close-btn">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <form id="project-form">
+                    <div class="form-group">
+                        <label class="form-label required" for="modal-project-name">Nombre del Proyecto</label>
+                        <input type="text" id="modal-project-name" class="form-input" placeholder="Ej: Construcción de Bypass" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="modal-project-desc">Descripción</label>
+                        <textarea id="modal-project-desc" class="form-textarea" placeholder="Describe brevemente..."></textarea>
+                        <div class="form-help">Opcional</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="modal-project-status">Estado</label>
+                        <select id="modal-project-status" class="form-select">
+                            <option value="active">Activo</option>
+                            <option value="inactive">Inactivo</option>
+                            <option value="completed">Completado</option>
+                            <option value="archived">Archivado</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Distrito(s)</label>
+                        <select id="modal-project-districts" multiple class="multi-select" style="height: 120px;">
+                            </select>
+                        <small class="form-help">Mantén presionado Ctrl (o Cmd) para seleccionar varios.</small>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-modal btn-modal-cancel" id="modal-cancel-btn">Cancelar</button>
+                <button type="submit" class="btn-modal btn-modal-primary" id="modal-submit-btn">
+                    <i data-lucide="check"></i> Crear Proyecto
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/general_map.js"></script>
+    <script src="/static/js/district_map.js"></script>
+    <script src="/static/js/drawings.js"></script>
+    <script src="/static/js/projects.js"></script>
+    <script src="/static/js/modal.js"></script>
+    <script src="/static/js/ui.js"></script>
+    <script src="/static/js/app.js"></script>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>lucide.createIcons();</script>
+
+</body>
+</html>
