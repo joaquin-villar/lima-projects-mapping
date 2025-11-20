@@ -5,6 +5,9 @@ from backend import models, schemas
 from typing import List, Dict, Any
 from urllib.parse import unquote
 from sqlalchemy import distinct
+from pathlib import Path # 👈 Importación faltante
+import os # 👈 FIX: Importación crítica faltante
+import json # 👈 FIX: Importación faltante
 
 router = APIRouter(prefix="/api", tags=["General Map & Districts"])
 
@@ -14,7 +17,6 @@ router = APIRouter(prefix="/api", tags=["General Map & Districts"])
 def get_district_list_from_param(district_param: str) -> List[str]:
     """Decodifica el string y lo convierte en una lista de distritos."""
     decoded_param = unquote(district_param)
-    # Si hay comas, lo separamos en una lista; si no, es un solo distrito
     return [d.strip() for d in decoded_param.split(',')]
 
 # -------------------------------------------------------------
@@ -33,6 +35,7 @@ def get_district_projects(district_name: str, db: Session = Depends(get_db)):
         models.ProjectDistrict.distrito_name.in_(district_list)
     ).distinct().order_by(models.Project.created_at.desc()).all()
     
+    # Nota: ProjectResponse debe tener from_orm activado
     return [schemas.ProjectResponse.from_orm(p) for p in projects]
 
 # -------------------------------------------------------------
@@ -45,7 +48,7 @@ def get_district_stats(district_name: str, db: Session = Depends(get_db)):
     """
     district_list = get_district_list_from_param(district_name)
     
-    # Obtenemos los proyectos relevantes (similar al de arriba)
+    # Obtenemos los proyectos relevantes
     projects_query = db.query(models.Project).join(models.ProjectDistrict).filter(
         models.ProjectDistrict.distrito_name.in_(district_list)
     ).distinct()
@@ -72,14 +75,15 @@ def get_district_stats(district_name: str, db: Session = Depends(get_db)):
     }
 
 # -------------------------------------------------------------
-# Ruta de GeoJSON (Se deja aquí, no en main.py)
+# Ruta de GeoJSON (Se queda aquí, no en main.py)
 # -------------------------------------------------------------
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-GEOJSON_PATH = os.path.join(BASE_DIR, "data", "geojson", "lima_callao_distritos.geojson")
+# 🟢 FIX: Usamos Pathlib para una gestión de rutas más robusta
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+GEOJSON_PATH = BASE_DIR / "data" / "geojson" / "lima_callao_distritos.geojson"
 
 @router.get("/districts-geojson")
 def get_districts_geojson():
-    if not os.path.exists(GEOJSON_PATH):
+    if not GEOJSON_PATH.exists(): # Usamos .exists() de Pathlib
         raise HTTPException(404, "GeoJSON file not found")
     with open(GEOJSON_PATH, "r", encoding="utf-8") as f:
         return json.load(f)
