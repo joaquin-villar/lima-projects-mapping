@@ -57,6 +57,11 @@ window.Auth = (function () {
         const modal = document.getElementById('login-modal');
         if (modal) {
             modal.classList.add('active');
+            const input = document.getElementById('login-token');
+            if (input) {
+                input.value = '';
+                setTimeout(() => input.focus(), 100);
+            }
             if (window.lucide) lucide.createIcons();
         }
     }

@@ -15,7 +15,17 @@ window.Api = {
         const res = await fetch(url, { ...options, headers });
 
         if (res.status === 401 || res.status === 403) {
+            // Close any open project modal
+            if (window.ProjectModal) {
+                window.ProjectModal.close();
+                window.ProjectModal.showNotification(
+                    res.status === 401 ? "Sesión expirada. Por favor, ingresa de nuevo." : "No tienes permisos para realizar esta acción.",
+                    "error"
+                );
+            }
+
             if (window.Auth) {
+                if (res.status === 401) window.Auth.clearToken();
                 window.Auth.showLoginPrompt();
             }
             throw new Error(`Auth Error: ${res.status}`);
