@@ -15,14 +15,10 @@ window.DistrictMap = (function () {
             zoomControl: true
         });
 
-        // Panel especial para la máscara oscura (z-index alto)
+        // Panel especial para la máscara oscura (z-index bajo entre tiles y vectores)
         map.createPane("maskPane");
-        map.getPane("maskPane").style.zIndex = 650;
+        map.getPane("maskPane").style.zIndex = 350;
         map.getPane("maskPane").style.pointerEvents = "none";
-
-        // Panel para dibujos (encima de la máscara)
-        map.createPane("drawingPane");
-        map.getPane("drawingPane").style.zIndex = 700;
 
         setBaseLayer("satellite");
         setupDrawingTools();
@@ -38,11 +34,11 @@ window.DistrictMap = (function () {
         const drawControl = new L.Control.Draw({
             edit: { featureGroup: drawingLayer },
             draw: {
-                polygon: { shapeOptions: { pane: "drawingPane" } },
-                polyline: { shapeOptions: { pane: "drawingPane" } },
-                rectangle: { shapeOptions: { pane: "drawingPane" } },
-                circle: { shapeOptions: { pane: "drawingPane" } },
-                marker: { pane: "drawingPane" },
+                polygon: true,
+                polyline: true,
+                rectangle: true,
+                circle: true,
+                marker: true,
                 circlemarker: false
             }
         });

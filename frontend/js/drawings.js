@@ -24,7 +24,6 @@ window.Drawings = (function () {
                     const geo = typeof d.geojson === 'string' ? JSON.parse(d.geojson) : d.geojson;
 
                     const geoLayer = L.geoJSON(geo, {
-                        pane: targetLayer === window.DistrictMap?.getDrawingLayer() ? "drawingPane" : "overlayPane",
                         style: {
                             color: isHighlighted ? "#22c55e" : "#00B4D8",
                             weight: isHighlighted ? 5 : 3,
@@ -33,7 +32,6 @@ window.Drawings = (function () {
                         },
                         pointToLayer: (feature, latlng) => {
                             return L.circleMarker(latlng, {
-                                pane: targetLayer === window.DistrictMap?.getDrawingLayer() ? "drawingPane" : "overlayPane",
                                 radius: isHighlighted ? 10 : 7,
                                 fillColor: isHighlighted ? "#22c55e" : "#00B4D8",
                                 color: "#fff",
@@ -57,10 +55,15 @@ window.Drawings = (function () {
                             ? window.mapOverview
                             : window.mapDetail;
                         if (map) {
-                            if (geo.type === "Point") {
-                                map.setView([geo.coordinates[1], geo.coordinates[0]], 16);
+                            // Detectar geometría (geo puede ser un Feature o directamente un Geometry)
+                            const geometry = geo.geometry || geo;
+                            if (geometry.type === "Point") {
+                                map.setView([geometry.coordinates[1], geometry.coordinates[0]], 16);
                             } else {
-                                map.fitBounds(geoLayer.getBounds(), { padding: [50, 50] });
+                                const bounds = geoLayer.getBounds();
+                                if (bounds && bounds.isValid()) {
+                                    map.fitBounds(bounds, { padding: [50, 50] });
+                                }
                             }
                         }
                     }
