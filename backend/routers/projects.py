@@ -16,7 +16,10 @@ router = APIRouter(tags=["Projects"])
 def get_all_projects(db: Session = Depends(get_db)):
     """Obtiene todos los proyectos."""
     # Use joinedload to fetch districts in a single query
-    projects = db.query(models.Project).options(joinedload(models.Project.districts)).all()
+    projects = db.query(models.Project).options(
+        joinedload(models.Project.districts),
+        joinedload(models.Project.drawings)
+    ).all()
     
     return projects
 
@@ -52,7 +55,10 @@ def create_project(project: schemas.ProjectCreate, db: Session = Depends(get_db)
 @router.get("/{project_id}", response_model=schemas.ProjectResponse)
 def get_project(project_id: int, db: Session = Depends(get_db)):
     """Obtiene un proyecto por ID."""
-    project = db.query(models.Project).options(joinedload(models.Project.districts)).filter(models.Project.id == project_id).first()
+    project = db.query(models.Project).options(
+        joinedload(models.Project.districts),
+        joinedload(models.Project.drawings)
+    ).filter(models.Project.id == project_id).first()
     if not project:
         raise HTTPException(404, "Project not found")
     

@@ -243,6 +243,14 @@ window.Projects = (function () {
                 </div>
             `).join("");
 
+            // 🟢 NUEVO: Renderizar dibujos de TODOS los proyectos del distrito en los mapas
+            if (window.Drawings) {
+                const overviewLayer = window.GeneralMap?.getDrawingLayer();
+                const detailLayer = window.DistrictMap?.getDrawingLayer();
+                Drawings.renderProjects(projects, overviewLayer, { clear: true });
+                Drawings.renderProjects(projects, detailLayer, { clear: true });
+            }
+
             // Seleccionamos todas las tarjetas recién creadas
             const cards = document.querySelectorAll("#district-projects-list .project-card");
 
@@ -262,18 +270,27 @@ window.Projects = (function () {
 
                     if (isAlreadyActive) {
                         // --- CASO DESELECCIONAR ---
-                        // Ya limpiamos todo arriba, solo falta limpiar la variable de estado
                         console.log("Proyecto deseleccionado");
                         currentProject = null;
-                        // No cargamos dibujos ni hacemos nada más
 
+                        // Volver a renderizar todos en azul
+                        if (window.Drawings) {
+                            Drawings.renderProjects(projects, window.GeneralMap?.getDrawingLayer(), { clear: true });
+                            Drawings.renderProjects(projects, window.DistrictMap?.getDrawingLayer(), { clear: true });
+                        }
                     } else {
                         // --- CASO SELECCIONAR ---
                         el.classList.add("active");
+                        const projectId = parseInt(el.dataset.id);
+
+                        // Resaltar el seleccionado en verde
+                        if (window.Drawings) {
+                            Drawings.renderProjects(projects, window.GeneralMap?.getDrawingLayer(), { clear: true, highlightId: projectId });
+                            Drawings.renderProjects(projects, window.DistrictMap?.getDrawingLayer(), { clear: true, highlightId: projectId });
+                        }
 
                         try {
-                            // Actualizamos currentProject
-                            currentProject = await Api.get(`/api/projects/${el.dataset.id}`);
+                            currentProject = await Api.get(`/api/projects/${projectId}`);
 
                             // Cargamos dibujos
                             if (window.Drawings) {
@@ -316,7 +333,7 @@ window.Projects = (function () {
 
     async function updateProjectFromModal(projectId, projectData) {
         try {
-            const updatedProject = await Api.put(`/api/projects/${projectId}`, projectData);
+            const updatedProject = await Api.put(`/ api / projects / ${projectId} `, projectData);
             await loadProjects();
             await loadProject(updatedProject.id);
             return updatedProject;
@@ -333,7 +350,7 @@ window.Projects = (function () {
     async function deleteCurrentProject() {
         if (!currentProject || isDeleting) return;
 
-        const confirmed = await window.Auth.showConfirm(`¿Estás seguro de que deseas eliminar permanentemente el proyecto "${currentProject.name}"?`);
+        const confirmed = await window.Auth.showConfirm(`¿Estás seguro de que deseas eliminar permanentemente el proyecto "${currentProject.name}" ? `);
         if (!confirmed) return;
 
         isDeleting = true;
@@ -341,7 +358,7 @@ window.Projects = (function () {
         const deletedName = currentProject.name;
 
         try {
-            await Api.del(`/api/projects/${deletedId}`);
+            await Api.del(`/ api / projects / ${deletedId} `);
 
             // Importante: Limpiar estado ANTES de recargar
             currentProject = null;
@@ -410,7 +427,7 @@ window.Projects = (function () {
             }
             if (window.UI) UI.switchTab("detail");
             const distStr = currentProject.districts.join(", ");
-            notify(`Visualizando ${currentProject.name} en: ${distStr}`, "success");
+            notify(`Visualizando ${currentProject.name} en: ${distStr} `, "success");
         } else {
             notify("Este proyecto no tiene distritos asignados", "error");
         }

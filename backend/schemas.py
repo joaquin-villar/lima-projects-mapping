@@ -21,6 +21,7 @@ class ProjectResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     districts: List[str] = []
+    drawings: List[DrawingResponse] = []
 
     @field_validator("districts", mode="before")
     @classmethod

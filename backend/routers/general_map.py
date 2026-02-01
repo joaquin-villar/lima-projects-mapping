@@ -25,7 +25,10 @@ def get_district_projects(district_name: str, db: Session = Depends(get_db)):
     district_list = get_district_list_from_param(district_name)
     
     from sqlalchemy import func
-    projects = db.query(models.Project).options(joinedload(models.Project.districts)).join(models.ProjectDistrict).filter(
+    projects = db.query(models.Project).options(
+        joinedload(models.Project.districts),
+        joinedload(models.Project.drawings)
+    ).join(models.ProjectDistrict).filter(
         func.lower(models.ProjectDistrict.distrito_name).in_([d.lower() for d in district_list])
     ).distinct().order_by(models.Project.created_at.desc()).all()
     

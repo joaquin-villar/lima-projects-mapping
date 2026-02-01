@@ -10,29 +10,78 @@ window.Drawings = (function () {
         }
     }
 
+    function renderProjects(projects, targetLayer, options = {}) {
+        if (!targetLayer) return;
+
+        const { clear = false, highlightId = null } = options;
+        if (clear) targetLayer.clearLayers();
+
+        projects.forEach(p => {
+            const isHighlighted = p.id === highlightId;
+
+            p.drawings.forEach(d => {
+                try {
+                    const geo = typeof d.geojson === 'string' ? JSON.parse(d.geojson) : d.geojson;
+
+                    const geoLayer = L.geoJSON(geo, {
+                        style: {
+                            color: isHighlighted ? "#22c55e" : "#00B4D8",
+                            weight: isHighlighted ? 5 : 3,
+                            opacity: 1,
+                            fillOpacity: 0.2
+                        },
+                        pointToLayer: (feature, latlng) => {
+                            return L.circleMarker(latlng, {
+                                radius: isHighlighted ? 10 : 7,
+                                fillColor: isHighlighted ? "#22c55e" : "#00B4D8",
+                                color: "#fff",
+                                weight: 2,
+                                opacity: 1,
+                                fillOpacity: 0.8
+                            });
+                        }
+                    });
+
+                    geoLayer.bindTooltip(`<strong>${p.name}</strong><br>${p.status}`, {
+                        sticky: true,
+                        className: 'custom-tooltip'
+                    });
+
+                    geoLayer.addTo(targetLayer);
+
+                    // Si estamos cargando un solo proyecto resaltado, centrar el mapa
+                    if (isHighlighted && options.fitBounds !== false) {
+                        const map = targetLayer === window.GeneralMap?.getDrawingLayer()
+                            ? window.mapOverview
+                            : window.mapDetail;
+                        if (map) {
+                            if (geo.type === "Point") {
+                                map.setView([geo.coordinates[1], geo.coordinates[0]], 16);
+                            } else {
+                                map.fitBounds(geoLayer.getBounds(), { padding: [50, 50] });
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.error("Error parsing geojson", e);
+                }
+            });
+        });
+    }
+
     async function loadProjectDrawings(projectId) {
         try {
-            const drawings = await Api.get(`/api/projects/${projectId}/drawings`);
+            const project = await Api.get(`/api/projects/${projectId}`);
+            if (!project) return;
 
-            // Obtenemos las capas de dibujo de AMBOS mapas por seguridad
             const overviewLayer = window.GeneralMap?.getDrawingLayer();
             const detailLayer = window.DistrictMap?.getDrawingLayer();
 
-            // Limpiamos
-            if (overviewLayer) overviewLayer.clearLayers();
-            if (detailLayer) detailLayer.clearLayers();
+            renderProjects([project], overviewLayer, { clear: true, highlightId: projectId });
+            renderProjects([project], detailLayer, { clear: true, highlightId: projectId });
 
-            // Dibujamos
-            drawings.forEach(d => {
-                const geo = JSON.parse(d.geojson);
-
-                // Agregamos a ambos mapas para mantener sincronía visual
-                if (overviewLayer) L.geoJSON(geo).addTo(overviewLayer);
-                if (detailLayer) L.geoJSON(geo).addTo(detailLayer);
-            });
         } catch (err) {
             console.error(err);
-            // No notificamos aquí para no spamear al navegar
         }
     }
 
@@ -95,6 +144,7 @@ window.Drawings = (function () {
 
     return {
         loadProjectDrawings,
-        saveCurrentDrawings
+        saveCurrentDrawings,
+        renderProjects
     };
 })();
