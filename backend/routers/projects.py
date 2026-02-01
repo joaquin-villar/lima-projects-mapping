@@ -17,10 +17,6 @@ def get_all_projects(db: Session = Depends(get_db)):
     # Use joinedload to fetch districts in a single query
     projects = db.query(models.Project).options(joinedload(models.Project.districts)).all()
     
-    # Transform districts to list of strings for pydantic
-    for p in projects:
-        p.districts = [d.distrito_name for d in p.districts]
-        
     return projects
 
 # -------------------------------------------------------------
@@ -46,8 +42,6 @@ def create_project(project: schemas.ProjectCreate, db: Session = Depends(get_db)
     db.commit()
     db.refresh(new_project)
     
-    # Prepare list for response
-    new_project.districts = project.districts
     return new_project
 
 # -------------------------------------------------------------
@@ -61,8 +55,6 @@ def get_project(project_id: int, db: Session = Depends(get_db)):
     if not project:
         raise HTTPException(404, "Project not found")
     
-    # Transform districts to list of strings
-    project.districts = [d.distrito_name for d in project.districts]
     return project
 
 # -------------------------------------------------------------
@@ -93,8 +85,6 @@ def update_project(project_id: int, project: schemas.ProjectCreate, db: Session 
     db.commit()
     db.refresh(db_project)
     
-    # Prepare list for response
-    db_project.districts = project.districts
     return db_project
 
 # -------------------------------------------------------------

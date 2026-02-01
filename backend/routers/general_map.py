@@ -28,10 +28,6 @@ def get_district_projects(district_name: str, db: Session = Depends(get_db)):
         models.ProjectDistrict.distrito_name.in_(district_list)
     ).distinct().order_by(models.Project.created_at.desc()).all()
     
-    # Transform districts to list of strings
-    for p in projects:
-        p.districts = [d.distrito_name for d in p.districts]
-    
     return projects
 
 @router.get("/districts/{district_name}/stats", response_model=Dict[str, Any])

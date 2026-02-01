@@ -1,5 +1,4 @@
-# backend/schemas.py
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from datetime import datetime
 from typing import List, Optional
 
@@ -22,6 +21,13 @@ class ProjectResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     districts: List[str] = []
+
+    @field_validator("districts", mode="before")
+    @classmethod
+    def districts_to_list(cls, v):
+        if isinstance(v, list) and v and not isinstance(v[0], str):
+            return [d.distrito_name for d in v]
+        return v
 
     class Config:
         from_attributes = True
