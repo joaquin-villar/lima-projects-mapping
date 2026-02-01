@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session, joinedload
 from backend.database import get_db
 from backend import models, schemas
+from backend.routers.auth import editor_permission
 from datetime import datetime
 from typing import List
 
@@ -23,7 +24,7 @@ def get_all_projects(db: Session = Depends(get_db)):
 # CREATE PROJECT
 # -------------------------------------------------------------
 
-@router.post("", response_model=schemas.ProjectResponse)
+@router.post("", response_model=schemas.ProjectResponse, dependencies=[Depends(editor_permission)])
 def create_project(project: schemas.ProjectCreate, db: Session = Depends(get_db)):
     """Crea un nuevo proyecto y sus asociaciones de distrito."""
     new_project = models.Project(
@@ -61,7 +62,7 @@ def get_project(project_id: int, db: Session = Depends(get_db)):
 # UPDATE PROJECT
 # -------------------------------------------------------------
 
-@router.put("/{project_id}", response_model=schemas.ProjectResponse)
+@router.put("/{project_id}", response_model=schemas.ProjectResponse, dependencies=[Depends(editor_permission)])
 def update_project(project_id: int, project: schemas.ProjectCreate, db: Session = Depends(get_db)):
     """Actualiza un proyecto y sus distritos asociados."""
     db_project = db.query(models.Project).filter(models.Project.id == project_id).first()
@@ -91,7 +92,7 @@ def update_project(project_id: int, project: schemas.ProjectCreate, db: Session 
 # DELETE PROJECT
 # -------------------------------------------------------------
 
-@router.delete("/{project_id}")
+@router.delete("/{project_id}", dependencies=[Depends(editor_permission)])
 def delete_project(project_id: int, db: Session = Depends(get_db)):
     """Elimina un proyecto y todas sus dependencias."""
     project = db.query(models.Project).filter(models.Project.id == project_id).first()

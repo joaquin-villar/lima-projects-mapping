@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from backend import models, schemas
 from backend.database import get_db
+from backend.routers.auth import editor_permission
 from typing import List
 
 router = APIRouter(tags=["Annotations"])
@@ -14,7 +15,7 @@ def get_annotations(project_id: int, db: Session = Depends(get_db)):
         models.Annotation.project_id == project_id
     ).all()
 
-@router.post("/{project_id}/annotations")
+@router.post("/{project_id}/annotations", dependencies=[Depends(editor_permission)])
 def add_annotation(project_id: int, annotation: schemas.AnnotationCreate, db: Session = Depends(get_db)):
     """Agrega una nueva anotación a un proyecto."""
     project = db.query(models.Project).filter(models.Project.id == project_id).first()
@@ -27,7 +28,7 @@ def add_annotation(project_id: int, annotation: schemas.AnnotationCreate, db: Se
     db.refresh(db_annotation)
     return db_annotation
 
-@router.delete("/{project_id}/annotations/{annotation_id}")
+@router.delete("/{project_id}/annotations/{annotation_id}", dependencies=[Depends(editor_permission)])
 def delete_annotation(project_id: int, annotation_id: int, db: Session = Depends(get_db)):
     """Elimina una anotación específica."""
     annotation = db.query(models.Annotation).filter(

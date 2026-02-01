@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 import json
 from backend.database import get_db
 from backend import models, schemas
+from backend.routers.auth import editor_permission
 from typing import List
 
 router = APIRouter(tags=["Drawings"])
@@ -15,7 +16,7 @@ def get_drawings(project_id: int, db: Session = Depends(get_db)):
         models.Drawing.project_id == project_id
     ).all()
 
-@router.post("/{project_id}/drawings")
+@router.post("/{project_id}/drawings", dependencies=[Depends(editor_permission)])
 def add_drawing(project_id: int, drawing: schemas.DrawingCreate, db: Session = Depends(get_db)):
     """Agrega un nuevo dibujo a un proyecto."""
     project = db.query(models.Project).filter(models.Project.id == project_id).first()
@@ -32,7 +33,7 @@ def add_drawing(project_id: int, drawing: schemas.DrawingCreate, db: Session = D
     db.refresh(new_drawing)
     return new_drawing
 
-@router.delete("/{project_id}/drawings/{drawing_id}")
+@router.delete("/{project_id}/drawings/{drawing_id}", dependencies=[Depends(editor_permission)])
 def delete_drawing(project_id: int, drawing_id: int, db: Session = Depends(get_db)):
     """Elimina un dibujo específico."""
     drawing = db.query(models.Drawing).filter(
