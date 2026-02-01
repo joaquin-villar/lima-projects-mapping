@@ -44,7 +44,7 @@ class ProjectDistrict(Base):
     __tablename__ = "project_districts"
 
     id = Column(Integer, primary_key=True, index=True)
-    project_id = Column(Integer, ForeignKey("projects.id"))
+    project_id = Column(Integer, ForeignKey("projects.id", ondelete="CASCADE"))
     distrito_name = Column(String, nullable=False, index=True)
     notes = Column(Text, nullable=True)
 
@@ -58,7 +58,7 @@ class Drawing(Base):
     __tablename__ = "drawings"
 
     id = Column(Integer, primary_key=True, index=True)
-    project_id = Column(Integer, ForeignKey("projects.id"), index=True)
+    project_id = Column(Integer, ForeignKey("projects.id", ondelete="CASCADE"), index=True)
     geojson = Column(Text, nullable=False)
     drawing_type = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -69,7 +69,7 @@ class Annotation(Base):
     __tablename__ = "annotations"
 
     id = Column(Integer, primary_key=True, index=True)
-    project_id = Column(Integer, ForeignKey("projects.id"), index=True)
+    project_id = Column(Integer, ForeignKey("projects.id", ondelete="CASCADE"), index=True)
     distrito_name = Column(String, nullable=False)
     title = Column(String, nullable=False)
     content = Column(Text, nullable=False)
@@ -80,7 +80,7 @@ class Annotation(Base):
 class EditHistory(Base):
     __tablename__ = "edit_history"
     id = Column(Integer, primary_key=True)
-    project_id = Column(Integer, ForeignKey('projects.id'))
+    project_id = Column(Integer, ForeignKey('projects.id', ondelete="CASCADE"))
     edited_by = Column(String, ForeignKey('users.id'))
     field_changed = Column(String)
     old_value = Column(Text)
@@ -94,7 +94,7 @@ class EditSuggestion(Base):
     """For handling conflicts and pending edits"""
     __tablename__ = "edit_suggestions"
     id = Column(Integer, primary_key=True)
-    project_id = Column(Integer, ForeignKey('projects.id'))
+    project_id = Column(Integer, ForeignKey('projects.id', ondelete="CASCADE"))
     suggested_by = Column(String, ForeignKey('users.id'))
     changes = Column(JSON)  # Store proposed changes
     status = Column(String, default='pending')  # pending, approved, rejected

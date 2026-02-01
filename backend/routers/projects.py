@@ -94,11 +94,27 @@ def update_project(project_id: int, project: schemas.ProjectCreate, db: Session 
 
 @router.delete("/{project_id}", dependencies=[Depends(editor_permission)])
 def delete_project(project_id: int, db: Session = Depends(get_db)):
-    """Elimina un proyecto y todas sus dependencias."""
+    """Elimina un proyecto y todas sus dependencias de forma robusta."""
     project = db.query(models.Project).filter(models.Project.id == project_id).first()
     if not project:
         raise HTTPException(404, "Project not found")
 
-    db.delete(project)
-    db.commit()
-    return {"message": "Project deleted"}
+    try:
+        # 1. Pruning manual (Garantiza borrado incluso si falla el cascade de SQLAlchemy)
+        db.query(models.ProjectDistrict).filter(models.ProjectDistrict.project_id == project_id).delete()
+        db.query(models.Drawing).filter(models.Drawing.project_id == project_id).delete()
+        db.query(models.Annotation).filter(models.Annotation.project_id == project_id).delete()
+        db.query(models.EditHistory).filter(models.EditHistory.project_id == project_id).delete()
+        db.query(models.EditSuggestion).filter(models.EditSuggestion.project_id == project_id).delete()
+
+        # 2. Borrar proyecto padre
+        db.delete(project)
+        db.commit()
+        return {"message": f"Project {project_id} deleted successfully"}
+    except Exception as e:
+        db.rollback()
+        print(f"ERROR deleting project {project_id}: {str(e)}")
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Database error during deletion: {str(e)}"
+        )

@@ -5,15 +5,32 @@ window.Auth = (function () {
     let lastActivity = Date.now();
     const TIMEOUT_MS = 60 * 60 * 1000; // 60 minutes
 
+    function parseJwt(token) {
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            return JSON.parse(jsonPayload);
+        } catch (e) {
+            console.error("JWT Parse Error", e);
+            return null;
+        }
+    }
+
     function updateStatusUI() {
         const container = document.getElementById('auth-status');
         if (!container) return;
 
         if (authToken) {
+            const payload = parseJwt(authToken);
+            const role = (payload && payload.role) ? payload.role.toUpperCase() : "EDITOR";
+
             container.innerHTML = `
                 <div class="auth-user-badge">
-                    <i data-lucide="user-check" style="width: 14px; height: 14px;"></i>
-                    Modo Editor
+                    <i data-lucide="shield-check" style="width: 14px; height: 14px;"></i>
+                    Modo ${role}
                 </div>
                 <button id="auth-logout-btn" class="auth-logout-btn" title="Cerrar Sesión">
                     <i data-lucide="log-out" style="width: 16px; height: 16px;"></i>
