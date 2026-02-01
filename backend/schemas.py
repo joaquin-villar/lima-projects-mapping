@@ -14,6 +14,11 @@ class ProjectResponse(BaseModel):
     name: str
     description: Optional[str]
     status: str
+    verified: bool
+    verified_by: Optional[str]
+    created_by: Optional[str]
+    source_url: Optional[str]
+    scraped_at: Optional[datetime]
     created_at: datetime
     updated_at: datetime
     districts: List[str] = []

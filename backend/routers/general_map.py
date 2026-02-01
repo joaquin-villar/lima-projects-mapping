@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from backend.database import get_db
 from backend import models, schemas
 from typing import List, Dict, Any
@@ -24,36 +24,24 @@ def get_district_projects(district_name: str, db: Session = Depends(get_db)):
     """Obtiene todos los proyectos de uno o más distritos."""
     district_list = get_district_list_from_param(district_name)
     
-    projects = db.query(models.Project).join(models.ProjectDistrict).filter(
+    projects = db.query(models.Project).options(joinedload(models.Project.districts)).join(models.ProjectDistrict).filter(
         models.ProjectDistrict.distrito_name.in_(district_list)
     ).distinct().order_by(models.Project.created_at.desc()).all()
     
-    # 🔧 FIX: Build response manually
-    result = []
+    # Transform districts to list of strings
     for p in projects:
-        response = schemas.ProjectResponse(
-            id=p.id,
-            name=p.name,
-            description=p.description,
-            status=p.status,
-            created_at=p.created_at,
-            updated_at=p.updated_at,
-            districts=[pd.distrito_name for pd in p.districts]
-        )
-        result.append(response)
+        p.districts = [d.distrito_name for d in p.districts]
     
-    return result
+    return projects
 
 @router.get("/districts/{district_name}/stats", response_model=Dict[str, Any])
 def get_district_stats(district_name: str, db: Session = Depends(get_db)):
     """Obtiene estadísticas de proyectos por distrito(s)."""
     district_list = get_district_list_from_param(district_name)
     
-    projects_query = db.query(models.Project).join(models.ProjectDistrict).filter(
+    projects = db.query(models.Project).join(models.ProjectDistrict).filter(
         models.ProjectDistrict.distrito_name.in_(district_list)
-    ).distinct()
-    
-    projects = projects_query.all()
+    ).distinct().all()
     
     total = len(projects)
     active = sum(1 for p in projects if p.status == 'active')

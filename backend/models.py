@@ -1,8 +1,22 @@
 # backend/models.py
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, UniqueConstraint
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, UniqueConstraint, Boolean, JSON, Enum
 from sqlalchemy.orm import relationship
 from datetime import datetime
+import enum
 from .database import Base
+
+class UserRole(enum.Enum):
+    VIEWER = "viewer"
+    EDITOR = "editor"
+    VERIFIED = "verified"
+    ADMIN = "admin"
+
+class User(Base):
+    __tablename__ = "users"
+    id = Column(String, primary_key=True)  # from Neon Auth
+    email = Column(String, unique=True)
+    role = Column(Enum(UserRole), default=UserRole.VIEWER)
+    created_at = Column(DateTime, default=datetime.utcnow)
 
 class Project(Base):
     __tablename__ = "projects"
@@ -11,9 +25,15 @@ class Project(Base):
     name = Column(String, nullable=False)
     description = Column(Text, nullable=True)
     status = Column(String, default="active")
+    verified = Column(Boolean, default=False)
+    verified_by = Column(String, ForeignKey('users.id'), nullable=True)
+    created_by = Column(String, ForeignKey('users.id'), nullable=True)
+    source_url = Column(String, nullable=True)
+    scraped_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
+    # Relationships
     districts = relationship("ProjectDistrict", back_populates="project", cascade="all, delete-orphan")
     drawings = relationship("Drawing", back_populates="project", cascade="all, delete-orphan")
     annotations = relationship("Annotation", back_populates="project", cascade="all, delete-orphan")
@@ -23,7 +43,7 @@ class ProjectDistrict(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     project_id = Column(Integer, ForeignKey("projects.id"))
-    distrito_name = Column(String, nullable=False, index=True)  # ✅ CORREGIDO: Solo una vez
+    distrito_name = Column(String, nullable=False, index=True)
     notes = Column(Text, nullable=True)
 
     project = relationship("Project", back_populates="districts")
@@ -54,3 +74,24 @@ class Annotation(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     project = relationship("Project", back_populates="annotations")
+
+class EditHistory(Base):
+    __tablename__ = "edit_history"
+    id = Column(Integer, primary_key=True)
+    project_id = Column(Integer, ForeignKey('projects.id'))
+    edited_by = Column(String, ForeignKey('users.id'))
+    field_changed = Column(String)
+    old_value = Column(Text)
+    new_value = Column(Text)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+    approved = Column(Boolean, default=None)  # None = pending
+
+class EditSuggestion(Base):
+    """For handling conflicts and pending edits"""
+    __tablename__ = "edit_suggestions"
+    id = Column(Integer, primary_key=True)
+    project_id = Column(Integer, ForeignKey('projects.id'))
+    suggested_by = Column(String, ForeignKey('users.id'))
+    changes = Column(JSON)  # Store proposed changes
+    status = Column(String, default='pending')  # pending, approved, rejected
+    created_at = Column(DateTime, default=datetime.utcnow)

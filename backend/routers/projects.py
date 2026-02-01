@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from backend.database import get_db
 from backend import models, schemas
 from datetime import datetime
@@ -11,32 +11,23 @@ router = APIRouter(tags=["Projects"])
 # LIST ALL PROJECTS
 # -------------------------------------------------------------
 
-@router.get("", response_model=List[schemas.ProjectResponse])  # Remove the "/"
+@router.get("", response_model=List[schemas.ProjectResponse])
 def get_all_projects(db: Session = Depends(get_db)):
     """Obtiene todos los proyectos."""
-    projects = db.query(models.Project).all()
+    # Use joinedload to fetch districts in a single query
+    projects = db.query(models.Project).options(joinedload(models.Project.districts)).all()
     
-    # 🔧 FIX: Build response list properly
-    result = []
+    # Transform districts to list of strings for pydantic
     for p in projects:
-        response = schemas.ProjectResponse(
-            id=p.id,
-            name=p.name,
-            description=p.description,
-            status=p.status,
-            created_at=p.created_at,
-            updated_at=p.updated_at,
-            districts=[pd.distrito_name for pd in p.districts]  # Extract district names
-        )
-        result.append(response)
-    
-    return result
+        p.districts = [d.distrito_name for d in p.districts]
+        
+    return projects
 
 # -------------------------------------------------------------
 # CREATE PROJECT
 # -------------------------------------------------------------
 
-@router.post("", response_model=schemas.ProjectResponse)  # Remove the "/"
+@router.post("", response_model=schemas.ProjectResponse)
 def create_project(project: schemas.ProjectCreate, db: Session = Depends(get_db)):
     """Crea un nuevo proyecto y sus asociaciones de distrito."""
     new_project = models.Project(
@@ -55,17 +46,9 @@ def create_project(project: schemas.ProjectCreate, db: Session = Depends(get_db)
     db.commit()
     db.refresh(new_project)
     
-    # Build response manually
-    response = schemas.ProjectResponse(
-        id=new_project.id,
-        name=new_project.name,
-        description=new_project.description,
-        status=new_project.status,
-        created_at=new_project.created_at,
-        updated_at=new_project.updated_at,
-        districts=project.districts
-    )
-    return response
+    # Prepare list for response
+    new_project.districts = project.districts
+    return new_project
 
 # -------------------------------------------------------------
 # GET SINGLE PROJECT
@@ -74,21 +57,13 @@ def create_project(project: schemas.ProjectCreate, db: Session = Depends(get_db)
 @router.get("/{project_id}", response_model=schemas.ProjectResponse)
 def get_project(project_id: int, db: Session = Depends(get_db)):
     """Obtiene un proyecto por ID."""
-    project = db.query(models.Project).filter(models.Project.id == project_id).first()
+    project = db.query(models.Project).options(joinedload(models.Project.districts)).filter(models.Project.id == project_id).first()
     if not project:
         raise HTTPException(404, "Project not found")
     
-    # 🔧 FIX: Build response manually
-    response = schemas.ProjectResponse(
-        id=project.id,
-        name=project.name,
-        description=project.description,
-        status=project.status,
-        created_at=project.created_at,
-        updated_at=project.updated_at,
-        districts=[pd.distrito_name for pd in project.districts]
-    )
-    return response
+    # Transform districts to list of strings
+    project.districts = [d.distrito_name for d in project.districts]
+    return project
 
 # -------------------------------------------------------------
 # UPDATE PROJECT
@@ -118,17 +93,9 @@ def update_project(project_id: int, project: schemas.ProjectCreate, db: Session 
     db.commit()
     db.refresh(db_project)
     
-    # 🔧 FIX: Build response manually
-    response = schemas.ProjectResponse(
-        id=db_project.id,
-        name=db_project.name,
-        description=db_project.description,
-        status=db_project.status,
-        created_at=db_project.created_at,
-        updated_at=db_project.updated_at,
-        districts=project.districts
-    )
-    return response
+    # Prepare list for response
+    db_project.districts = project.districts
+    return db_project
 
 # -------------------------------------------------------------
 # DELETE PROJECT
