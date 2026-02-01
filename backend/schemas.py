@@ -2,6 +2,45 @@ from pydantic import BaseModel, Field, field_validator
 from datetime import datetime
 from typing import List, Optional
 
+# --- SUB-SCHEMAS FIRST ---
+
+class DistrictCreate(BaseModel):
+    distrito_name: str
+    notes: Optional[str] = None
+
+class DrawingCreate(BaseModel):
+    geojson: dict
+    drawing_type: str
+
+class DrawingBatch(BaseModel):
+    drawings: List[DrawingCreate]
+
+class DrawingResponse(BaseModel):
+    id: int
+    geojson: str
+    drawing_type: str
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class AnnotationCreate(BaseModel):
+    distrito_name: str
+    title: str
+    content: str
+
+class AnnotationResponse(BaseModel):
+    id: int
+    distrito_name: str
+    title: str
+    content: str
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+# --- MAIN SCHEMAS ---
+
 class ProjectCreate(BaseModel):
     name: str
     description: Optional[str] = None
@@ -30,37 +69,5 @@ class ProjectResponse(BaseModel):
             return [d.distrito_name for d in v]
         return v
 
-    class Config:
-        from_attributes = True
-
-class DistrictCreate(BaseModel):
-    distrito_name: str
-    notes: Optional[str] = None
-
-class DrawingCreate(BaseModel):
-    geojson: dict
-    drawing_type: str
-
-class DrawingResponse(BaseModel):
-    id: int
-    geojson: str
-    drawing_type: str
-    created_at: datetime
-    
-    class Config:
-        from_attributes = True
-
-class AnnotationCreate(BaseModel):
-    distrito_name: str
-    title: str
-    content: str
-
-class AnnotationResponse(BaseModel):
-    id: int
-    distrito_name: str
-    title: str
-    content: str
-    created_at: datetime
-    
     class Config:
         from_attributes = True

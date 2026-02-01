@@ -33,6 +33,32 @@ def add_drawing(project_id: int, drawing: schemas.DrawingCreate, db: Session = D
     db.refresh(new_drawing)
     return new_drawing
 
+@router.post("/{project_id}/drawings/batch", dependencies=[Depends(editor_permission)])
+def save_drawings_batch(project_id: int, batch: schemas.DrawingBatch, db: Session = Depends(get_db)):
+    """Reemplaza todos los dibujos de un proyecto con un nuevo set (Batch)."""
+    project = db.query(models.Project).filter(models.Project.id == project_id).first()
+    if not project:
+        raise HTTPException(404, "Project not found")
+
+    try:
+        # 1. Limpiar dibujos anteriores del proyecto
+        db.query(models.Drawing).filter(models.Drawing.project_id == project_id).delete()
+
+        # 2. Insertar los nuevos
+        for drawing_data in batch.drawings:
+            new_drawing = models.Drawing(
+                project_id=project_id,
+                geojson=json.dumps(drawing_data.geojson),
+                drawing_type=drawing_data.drawing_type
+            )
+            db.add(new_drawing)
+
+        db.commit()
+        return {"message": f"Successfully saved {len(batch.drawings)} drawings"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Error saving batch: {str(e)}")
+
 @router.delete("/{project_id}/drawings/{drawing_id}", dependencies=[Depends(editor_permission)])
 def delete_drawing(project_id: int, drawing_id: int, db: Session = Depends(get_db)):
     """Elimina un dibujo específico."""
