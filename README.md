@@ -1,43 +1,44 @@
 # 🗺️ Lima Projects Mapping
 
-Una aplicación web interactiva diseñada para visualizar, gestionar y analizar proyectos de infraestructura pública en los distritos de Lima y Callao. Esta herramienta permite a los usuarios monitorear el estado de las obras (activos, completados, archivados) mediante mapas satelitales y herramientas de dibujo.
+Una aplicación web interactiva diseñada para visualizar, gestionar y analizar proyectos de infraestructura pública en los distritos de Lima y Callao. Esta herramienta permite a los usuarios monitorear el estado de las obras (activos, inactivos, completados) mediante mapas satelitales y herramientas de dibujo avanzadas.
 
 ## 🚀 Características Principales
 
-- **Mapa General Interactivo:** Visualización completa de Lima y Callao con soporte para selección múltiple de distritos.
-- **Vista Detallada** Enfoque visual en distritos específicos, oscureciendo el resto del mapa para mayor precisión al editar.
-- **Gestión de Proyectos (CRUD):** Creación, edición y eliminación de proyectos con campos detallados y estados personalizables.
-- **Herramientas de Dibujo:** Integración con `Leaflet.draw` para trazar polígonos y geometrías sobre el mapa y guardarlos en la base de datos.
-- **Estadísticas:** Panel lateral dinámico que muestra estado de proyectos por estado y distrito.
-- **Base de Datos en la Nube:** Persistencia de datos segura y escalable utilizando PostgreSQL (Vercel).
+- **Mapa General Interactivo:** Visualización completa de Lima y Callao con soporte para selección múltiple de distritos y normalización de nombres.
+- **Vista Detallada:** Enfoque visual en distritos específicos con máscara inversa para mayor precisión en la edición de proyectos.
+- **Gestión de Proyectos (CRUD):** Creación, edición y eliminación de proyectos con persistencia de datos y estados actualizados.
+- **Seguridad y Roles:** Implementación de autenticación basada en **JWT (JSON Web Tokens)** para proteger acciones de edición.
+- **Herramientas de Dibujo:** Integración con `Leaflet.draw` para trazar geometrías (líneas, polígonos, puntos) vinculadas directamente a proyectos.
+- **Diseño Mobile-First:** Interfaz optimizada para dispositivos móviles con cabecera compacta y tarjetas de alta densidad.
+- **Estadísticas Dinámicas:** Panel que muestra el conteo de proyectos por estado en los distritos seleccionados.
 
 ## 🛠️ Tecnologías Utilizadas
 
 ### Frontend
-- **HTML5 / CSS3:** Diseño responsivo con CSS Grid y Flexbox.
-- **JavaScript (Vanilla ES6+):** Arquitectura modula (IIFE).
-- **Leaflet.js:** Motor de mapas interactivos.
-- **Leaflet.Draw:** Librería para herramientas de vectorización.
-- **Lucide Icons:** Iconografía moderna
+- **HTML5 / CSS3:** Diseño responsivo con CSS Grid/Flexbox y optimizaciones para móviles.
+- **JavaScript (Vanilla ES6+):** Arquitectura modular organizada en módulos (API, Auth, UI, Maps).
+- **Leaflet.js & Leaflet.Draw:** Motor de mapas y herramientas de vectorización.
+- **Lucide Icons:** Iconografía moderna y escalable.
 
 ### Backend
-- **Python 3.12.10**
-- **FastAPI**
-- **SQLAlchemy:** ORM para Gestion de Datos
-- **Pydantic:** Validación de datos
+- **Python 3.12**
+- **FastAPI:** Framework web asíncrono de alto rendimiento.
+- **SQLAlchemy:** ORM para gestión de datos relacionales con soporte para borrado en cascada.
+- **PyJWT:** Gestión de seguridad y tokens de acceso.
+- **Pydantic:** Validación estricta de esquemas de datos.
 
 ### Infraestructura
 - **Vercel:** Despliegue del Frontend y Serverless Functions.
-- **PostgreSQL (Vercel Storage):** Base de datos relacional en la nube.
+- **PostgreSQL (Vercel Storage):** Base de datos relacional en la nube para persistencia en producción.
 
 ## ⚙️ Instalación y Configuración Local
 
-Sigue estos pasos para ejecutar el proyecto en tu computadora:
+Sigue estos pasos para ejecutar el proyecto localmente:
 
 1. **Clonar el repositorio**
    ```bash
    git clone https://github.com/joaquin-villar/lima-projects-mapping.git
-   cd lima-proyect-mapping
+   cd lima-projects-mapping
    ```
 
 2. **Configurar entorno virtual (Python)**
@@ -48,17 +49,25 @@ Sigue estos pasos para ejecutar el proyecto en tu computadora:
     # En Mac/Linux:
     source venv/bin/activate
     ```
+
 3. **Instalar dependencias**
     ```bash
     pip install -r requirements.txt
     ```
 
-4. **Configurar Variables de Entorno**
+4. **Variables de Entorno**
+    Crea un archivo `.env` (o configura en tu shell):
     ```bash
-    POSTGRES_URL="postgresql://usuario:password@host:port/database"
+    POSTGRES_URL="tu_url_de_postgres"
+    SECRET_KEY="tu_clave_secreta_para_jwt"
     ```
 
-5. **Ejecutar el servidor**
+5. **Generar Token de Editor (Opcional)**
+    ```bash
+    python generate_token.py
+    ```
+
+6. **Ejecutar el servidor**
     ```bash
     python app.py
     ```
@@ -66,17 +75,17 @@ Sigue estos pasos para ejecutar el proyecto en tu computadora:
 ## 📂 Estructura del Proyecto
 ``` bash 
 ├── backend/           # Lógica del servidor (FastAPI)
-│   ├── models.py      # Modelos de Base de Datos (SQLAlchemy)
-│   ├── schemas.py     # Esquemas de Validación (Pydantic)
-│   ├── main.py        # Configuración principal de la API
-│   └── database.py    # Conexión a Postgres
+│   ├── routers/       # Endpoints organizados por recurso (Auth, Projects, etc.)
+│   ├── models.py      # Definición de tablas y relaciones
+│   ├── schemas.py     # Modelos de entrada/salida (Pydantic)
+│   └── database.py    # Conexión a Postgres (Local/Producción)
 ├── frontend/          # Interfaz de Usuario
-│   ├── js/            # Módulos JS (UI, Mapas, API, Proyectos, Modal)
-│   ├── css/           # Estilos globales
-│   └── index.html     # Punto de entrada
-├── data/              # GeoJSON estáticos de distritos
-├── app.py             # Script de ejecución local
-└── requirements.txt   # Dependencias de Python
+│   ├── js/            # Lógica cliente (auth.js, api.js, map logic)
+│   ├── css/           # Estilos globales y responsive
+│   └── index.html     # SPA Entry point
+├── data/              # Recursos estáticos (GeoJSON corregidos)
+├── app.py             # Entry point para ejecución local
+└── generate_token.py  # Utilidad para credenciales de editor
 ```
 
 ## ✒️ Autor
