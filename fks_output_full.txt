@@ -1,6 +1,0 @@
---- DATABASE CONSTRAINTS CHECK ---
-Table 'project_districts' has FK ['project_id'] referencing 'projects'
-Table 'drawings' has FK ['project_id'] referencing 'projects'
-Table 'annotations' has FK ['project_id'] referencing 'projects'
-Table 'edit_history' has FK ['project_id'] referencing 'projects'
-Table 'edit_suggestions' has FK ['project_id'] referencing 'projects'
