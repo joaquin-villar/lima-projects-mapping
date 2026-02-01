@@ -245,9 +245,7 @@ window.Projects = (function () {
 
             // 🟢 NUEVO: Renderizar dibujos de TODOS los proyectos del distrito en los mapas
             if (window.Drawings) {
-                const overviewLayer = window.GeneralMap?.getDrawingLayer();
                 const detailLayer = window.DistrictMap?.getDrawingLayer();
-                Drawings.renderProjects(projects, overviewLayer, { clear: true });
                 Drawings.renderProjects(projects, detailLayer, { clear: true });
             }
 
@@ -265,7 +263,6 @@ window.Projects = (function () {
                     cards.forEach(c => c.classList.remove("active"));
 
                     // Limpiar capas de dibujo inmediatamente para evitar confusión visual
-                    if (window.GeneralMap) window.GeneralMap.getDrawingLayer().clearLayers();
                     if (window.DistrictMap) window.DistrictMap.getDrawingLayer().clearLayers();
 
                     if (isAlreadyActive) {
@@ -275,7 +272,6 @@ window.Projects = (function () {
 
                         // Volver a renderizar todos en azul
                         if (window.Drawings) {
-                            Drawings.renderProjects(projects, window.GeneralMap?.getDrawingLayer(), { clear: true });
                             Drawings.renderProjects(projects, window.DistrictMap?.getDrawingLayer(), { clear: true });
                         }
                     } else {
@@ -285,7 +281,6 @@ window.Projects = (function () {
 
                         // Resaltar el seleccionado en verde
                         if (window.Drawings) {
-                            Drawings.renderProjects(projects, window.GeneralMap?.getDrawingLayer(), { clear: true, highlightId: projectId });
                             Drawings.renderProjects(projects, window.DistrictMap?.getDrawingLayer(), { clear: true, highlightId: projectId });
                         }
 

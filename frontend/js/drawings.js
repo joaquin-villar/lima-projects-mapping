@@ -74,10 +74,6 @@ window.Drawings = (function () {
             const project = await Api.get(`/api/projects/${projectId}`);
             if (!project) return;
 
-            const overviewLayer = window.GeneralMap?.getDrawingLayer();
-            const detailLayer = window.DistrictMap?.getDrawingLayer();
-
-            renderProjects([project], overviewLayer, { clear: true, highlightId: projectId });
             renderProjects([project], detailLayer, { clear: true, highlightId: projectId });
 
         } catch (err) {

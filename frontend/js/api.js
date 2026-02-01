@@ -32,12 +32,13 @@ window.Api = {
         }
 
         if (!res.ok) {
-            let errorDetail = "";
+            const errorText = await res.text();
+            let errorDetail = errorText;
             try {
-                const errorData = await res.json();
+                const errorData = JSON.parse(errorText);
                 errorDetail = errorData.detail || errorData.message || JSON.stringify(errorData);
             } catch (e) {
-                errorDetail = await res.text();
+                // Not JSON, use raw text
             }
             throw new Error(`HTTP ${res.status}: ${errorDetail || res.statusText}`);
         }
