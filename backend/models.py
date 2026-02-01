@@ -37,6 +37,8 @@ class Project(Base):
     districts = relationship("ProjectDistrict", back_populates="project", cascade="all, delete-orphan")
     drawings = relationship("Drawing", back_populates="project", cascade="all, delete-orphan")
     annotations = relationship("Annotation", back_populates="project", cascade="all, delete-orphan")
+    edit_history = relationship("EditHistory", back_populates="project", cascade="all, delete-orphan")
+    edit_suggestions = relationship("EditSuggestion", back_populates="project", cascade="all, delete-orphan")
 
 class ProjectDistrict(Base):
     __tablename__ = "project_districts"
@@ -85,6 +87,8 @@ class EditHistory(Base):
     new_value = Column(Text)
     timestamp = Column(DateTime, default=datetime.utcnow)
     approved = Column(Boolean, default=None)  # None = pending
+    
+    project = relationship("Project", back_populates="edit_history")
 
 class EditSuggestion(Base):
     """For handling conflicts and pending edits"""
@@ -95,3 +99,5 @@ class EditSuggestion(Base):
     changes = Column(JSON)  # Store proposed changes
     status = Column(String, default='pending')  # pending, approved, rejected
     created_at = Column(DateTime, default=datetime.utcnow)
+    
+    project = relationship("Project", back_populates="edit_suggestions")

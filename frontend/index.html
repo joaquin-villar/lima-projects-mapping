@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -40,6 +41,10 @@
                 </button>
             </nav>
 
+            <div id="auth-status" class="auth-status-container">
+                <!-- Will be populated by auth.js -->
+            </div>
+
         </div>
     </header>
 
@@ -49,7 +54,7 @@
             <div class="sidebar-content">
 
                 <div id="overview-sidebar-section" class="sidebar-section">
-                    
+
                     <div class="lima-hero-card">
                         <div class="hero-icon">
                             <i data-lucide="map"></i>
@@ -73,14 +78,15 @@
                     <h2 class="sidebar-heading">
                         <i data-lucide="building-2"></i> Proyectos en este distrito
                     </h2>
-                    
+
                     <div id="district-stats-container"></div>
 
-                    <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 16px; margin-bottom: 20px;">
+                    <div
+                        style="display: flex; flex-direction: column; gap: 10px; margin-top: 16px; margin-bottom: 20px;">
                         <button id="btn-new-project-in-district" class="action-btn primary">
                             <i data-lucide="plus-circle"></i> Nuevo proyecto en este distrito
                         </button>
-    
+
                         <button id="btn-save-drawings" class="action-btn secondary">
                             <i data-lucide="save"></i> Guardar dibujos en proyecto
                         </button>
@@ -227,7 +233,8 @@
 
         </main>
 
-    </div> <div id="project-modal" class="modal-overlay">
+    </div>
+    <div id="project-modal" class="modal-overlay">
         <div class="modal-container">
             <div class="modal-header">
                 <h2 class="modal-title">
@@ -240,12 +247,14 @@
                 <form id="project-form">
                     <div class="form-group">
                         <label class="form-label required" for="modal-project-name">Nombre del Proyecto</label>
-                        <input type="text" id="modal-project-name" class="form-input" placeholder="Ej: Construcción de Bypass" required>
+                        <input type="text" id="modal-project-name" class="form-input"
+                            placeholder="Ej: Construcción de Bypass" required>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label" for="modal-project-desc">Descripción</label>
-                        <textarea id="modal-project-desc" class="form-textarea" placeholder="Describe brevemente..."></textarea>
+                        <textarea id="modal-project-desc" class="form-textarea"
+                            placeholder="Describe brevemente..."></textarea>
                         <div class="form-help">Opcional</div>
                     </div>
 
@@ -262,7 +271,7 @@
                     <div class="form-group">
                         <label class="form-label">Distrito(s)</label>
                         <select id="modal-project-districts" multiple class="multi-select" style="height: 120px;">
-                            </select>
+                        </select>
                         <small class="form-help">Mantén presionado Ctrl (o Cmd) para seleccionar varios.</small>
                     </div>
                 </form>
@@ -272,6 +281,28 @@
                 <button type="button" class="btn-modal btn-modal-cancel" id="modal-cancel-btn">Cancelar</button>
                 <button type="submit" class="btn-modal btn-modal-primary" id="modal-submit-btn">
                     <i data-lucide="check"></i> Crear Proyecto
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🟢 CUSTOM CONFIRMATION MODAL -->
+    <div id="confirm-modal" class="modal-overlay">
+        <div class="modal-container" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2 class="modal-title" style="color: #ef4444;">
+                    <i data-lucide="alert-triangle"></i> Confirmar Acción
+                </h2>
+                <button class="modal-close" id="confirm-cancel-x">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="confirm-message" style="line-height: 1.6; color: #cbd5e1;"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-modal btn-modal-cancel" id="confirm-cancel-btn">Cancelar</button>
+                <button type="button" class="btn-modal btn-modal-primary" id="confirm-ok-btn"
+                    style="background: #ef4444;">
+                    Eliminar
                 </button>
             </div>
         </div>
@@ -291,18 +322,20 @@
             <form id="login-form" class="login-form">
                 <div class="login-input-group">
                     <label for="login-token">Token de Acceso (JWT)</label>
-                    <input type="password" id="login-token" class="form-input" placeholder="Ingresa tu token de editor..." required>
+                    <input type="password" id="login-token" class="form-input"
+                        placeholder="Ingresa tu token de editor..." required>
                 </div>
-                
+
                 <button type="submit" class="login-btn">
                     Confirmar Identidad
                 </button>
-                
+
                 <div id="login-error" class="login-error">
                     Token inválido o sin permisos suficientes.
                 </div>
-                
-                <button type="button" id="login-cancel" class="btn-modal btn-modal-cancel" style="margin-top: 8px; width: 100%;">
+
+                <button type="button" id="login-cancel" class="btn-modal btn-modal-cancel"
+                    style="margin-top: 8px; width: 100%;">
                     Cancelar
                 </button>
             </form>
@@ -326,4 +359,5 @@
     <script>lucide.createIcons();</script>
 
 </body>
+
 </html>

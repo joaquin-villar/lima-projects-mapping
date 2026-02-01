@@ -21,7 +21,7 @@ window.Projects = (function () {
             // 1. Salvar el panel de detalles antes de regenerar la lista
             const detailsSection = document.getElementById("project-details-section");
             const projectsContainer = document.querySelector('.projects-content');
-            
+
             if (detailsSection && detailsSection.parentNode.id === "project-list") {
                 projectsContainer.appendChild(detailsSection);
                 detailsSection.style.display = "none";
@@ -37,7 +37,7 @@ window.Projects = (function () {
                         <p>No hay proyectos todavía</p>
                         <small>Usa el panel lateral para crear tu primer proyecto</small>
                     </div>`;
-                if(window.lucide) lucide.createIcons();
+                if (window.lucide) lucide.createIcons();
                 return;
             }
 
@@ -71,10 +71,10 @@ window.Projects = (function () {
 
             // Restaurar panel si había un proyecto abierto
             if (currentProject) {
-                 setTimeout(() => injectDetailsPanelAfterRow(currentProject.id), 0);
+                setTimeout(() => injectDetailsPanelAfterRow(currentProject.id), 0);
             }
 
-            if(window.lucide) lucide.createIcons();
+            if (window.lucide) lucide.createIcons();
         } catch (err) {
             console.error(err);
             console.log("Error cargando lista de proyectos");
@@ -87,7 +87,7 @@ window.Projects = (function () {
     function injectDetailsPanelAfterRow(projectId) {
         const grid = document.getElementById("project-list");
         const detailsSection = document.getElementById("project-details-section");
-        
+
         const cards = Array.from(grid.querySelectorAll(".project-card"));
         const selectedCard = grid.querySelector(`.project-card[data-id="${projectId}"]`);
 
@@ -96,9 +96,9 @@ window.Projects = (function () {
         detailsSection.style.display = "block";
 
         const gridWidth = grid.offsetWidth;
-        const cardWidth = cards[0].offsetWidth; 
-        const gap = 24; 
-        
+        const cardWidth = cards[0].offsetWidth;
+        const gap = 24;
+
         const columns = Math.floor((gridWidth + gap) / (cardWidth + gap)) || 1;
         const index = cards.indexOf(selectedCard);
 
@@ -118,7 +118,7 @@ window.Projects = (function () {
         }
 
         setTimeout(() => {
-             detailsSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            detailsSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }, 100);
     }
 
@@ -146,9 +146,9 @@ window.Projects = (function () {
 
             nameInput.value = "";
             descInput.value = "";
-            statusInput.value = "active"; 
+            statusInput.value = "active";
             for (let i = 0; i < districtSelect.options.length; i++) districtSelect.options[i].selected = false;
-            
+
             await loadProjects();
             await loadProject(newProject.id);
 
@@ -166,7 +166,7 @@ window.Projects = (function () {
         try {
             document.querySelectorAll(".project-card").forEach(c => c.classList.remove("active"));
             const card = document.querySelector(`.project-card[data-id="${projectId}"]`);
-            if(card) card.classList.add("active");
+            if (card) card.classList.add("active");
 
             currentProject = await Api.get(`/api/projects/${projectId}`);
 
@@ -197,15 +197,15 @@ window.Projects = (function () {
 
             // Listener para botón Editar
             document.getElementById("btn-edit-project-modal").addEventListener("click", () => {
-                if(window.ProjectModal) {
-                    window.ProjectModal.open(currentProject); 
+                if (window.ProjectModal) {
+                    window.ProjectModal.open(currentProject);
                 }
             });
 
-            if(window.Drawings) await Drawings.loadProjectDrawings(currentProject.id);
-            
+            if (window.Drawings) await Drawings.loadProjectDrawings(currentProject.id);
+
             injectDetailsPanelAfterRow(projectId);
-            if(window.lucide) lucide.createIcons();
+            if (window.lucide) lucide.createIcons();
 
         } catch (err) {
             console.error(err);
@@ -224,7 +224,7 @@ window.Projects = (function () {
             const encoded = encodeURIComponent(AppState.selectedDistrict);
             const projects = await Api.get(`/api/districts/${encoded}/projects`);
             const listDiv = document.getElementById("district-projects-list");
-            
+
             if (!projects.length) {
                 listDiv.innerHTML = `
                     <div class="info-box" style="margin-top: 10px;">
@@ -247,7 +247,7 @@ window.Projects = (function () {
             const cards = document.querySelectorAll("#district-projects-list .project-card");
 
             cards.forEach(el => {
-                
+
                 // 🟢 1. UN SOLO CLICK: Toggle (Seleccionar / Deseleccionar)
                 el.addEventListener("click", async () => {
                     // Comprobamos si esta tarjeta YA estaba activa
@@ -255,10 +255,10 @@ window.Projects = (function () {
 
                     // A. Limpieza General: Quitamos active de todos y limpiamos mapas
                     cards.forEach(c => c.classList.remove("active"));
-                    
+
                     // Limpiar capas de dibujo inmediatamente para evitar confusión visual
-                    if(window.GeneralMap) window.GeneralMap.getDrawingLayer().clearLayers();
-                    if(window.DistrictMap) window.DistrictMap.getDrawingLayer().clearLayers();
+                    if (window.GeneralMap) window.GeneralMap.getDrawingLayer().clearLayers();
+                    if (window.DistrictMap) window.DistrictMap.getDrawingLayer().clearLayers();
 
                     if (isAlreadyActive) {
                         // --- CASO DESELECCIONAR ---
@@ -266,7 +266,7 @@ window.Projects = (function () {
                         console.log("Proyecto deseleccionado");
                         currentProject = null;
                         // No cargamos dibujos ni hacemos nada más
-                        
+
                     } else {
                         // --- CASO SELECCIONAR ---
                         el.classList.add("active");
@@ -274,9 +274,9 @@ window.Projects = (function () {
                         try {
                             // Actualizamos currentProject
                             currentProject = await Api.get(`/api/projects/${el.dataset.id}`);
-                            
+
                             // Cargamos dibujos
-                            if(window.Drawings) {
+                            if (window.Drawings) {
                                 Drawings.loadProjectDrawings(el.dataset.id);
                             }
                         } catch (e) {
@@ -288,11 +288,11 @@ window.Projects = (function () {
                 // 🟢 2. DOBLE CLICK: Ir a Gestión (Se mantiene igual)
                 el.addEventListener("dblclick", () => {
                     loadProject(el.dataset.id);
-                    if(window.UI) UI.switchTab("projects");
+                    if (window.UI) UI.switchTab("projects");
                 });
             });
 
-            if(window.lucide) lucide.createIcons();
+            if (window.lucide) lucide.createIcons();
         } catch (err) {
             console.error(err);
         }
@@ -304,7 +304,7 @@ window.Projects = (function () {
     async function createProjectFromModal(projectData) {
         try {
             const newProject = await Api.post("/api/projects", projectData);
-            if(window.UI) UI.switchTab("projects");
+            if (window.UI) UI.switchTab("projects");
             await loadProjects();
             await loadProject(newProject.id);
             return newProject;
@@ -331,18 +331,19 @@ window.Projects = (function () {
     --------------------------------------------------------- */
     async function deleteCurrentProject() {
         if (!currentProject) return;
-        
-        if (!confirm(`¿Eliminar proyecto "${currentProject.name}"?`)) return;
+
+        const confirmed = await window.Auth.showConfirm(`¿Estás seguro de que deseas eliminar permanentemente el proyecto "${currentProject.name}"?`);
+        if (!confirmed) return;
 
         try {
             const deletedName = currentProject.name;
             await Api.del(`/api/projects/${currentProject.id}`);
-            
+
             closeProjectDetails();
             await loadProjects();
-            
-            if(window.GeneralMap) window.GeneralMap.getDrawingLayer().clearLayers();
-            if(window.DistrictMap) window.DistrictMap.getDrawingLayer().clearLayers();
+
+            if (window.GeneralMap) window.GeneralMap.getDrawingLayer().clearLayers();
+            if (window.DistrictMap) window.DistrictMap.getDrawingLayer().clearLayers();
 
             notify(`Proyecto "${deletedName}" eliminado`, "success");
         } catch (err) {
@@ -362,7 +363,7 @@ window.Projects = (function () {
     }
 
     function formatDate(d) {
-        if(!d) return "";
+        if (!d) return "";
         return new Date(d).toLocaleDateString("es-PE", { year: "numeric", month: "short", day: "numeric" });
     }
 
@@ -377,40 +378,40 @@ window.Projects = (function () {
         loadProjects,
         createProject,
         createProjectFromModal,
-        updateProjectFromModal, 
+        updateProjectFromModal,
         loadProject,
         loadProjectsForCurrentDistrict,
         deleteCurrentProject,
         getCurrentProject: () => currentProject,
-        
+
         viewProjectOnMap() {
             if (!currentProject) return;
 
             if (currentProject.districts && currentProject.districts.length > 0) {
-                if(window.GeneralMap) {
-                    window.GeneralMap.deselectAll(false); 
+                if (window.GeneralMap) {
+                    window.GeneralMap.deselectAll(false);
                     currentProject.districts.forEach(distrito => {
                         window.GeneralMap.toggleDistrict(distrito);
                     });
                 }
-                if(window.UI) UI.switchTab("detail");
+                if (window.UI) UI.switchTab("detail");
                 const distStr = currentProject.districts.join(", ");
                 notify(`Visualizando ${currentProject.name} en: ${distStr}`, "success");
             } else {
                 notify("Este proyecto no tiene distritos asignados", "error");
             }
         },
-        
+
         closeProjectDetails() {
             currentProject = null;
             const detailsSection = document.getElementById("project-details-section");
-            if(detailsSection) {
+            if (detailsSection) {
                 detailsSection.style.display = "none";
             }
             document.querySelectorAll(".project-card").forEach(c => c.classList.remove("active"));
-            
-            if(window.GeneralMap) window.GeneralMap.getDrawingLayer().clearLayers();
-            if(window.DistrictMap) window.DistrictMap.getDrawingLayer().clearLayers();
+
+            if (window.GeneralMap) window.GeneralMap.getDrawingLayer().clearLayers();
+            if (window.DistrictMap) window.DistrictMap.getDrawingLayer().clearLayers();
         }
     };
 })();

@@ -1,7 +1,40 @@
 
 // frontend/js/auth.js
 window.Auth = (function () {
-    let authToken = localStorage.getItem('litmap_token') || null;
+    let authToken = sessionStorage.getItem('litmap_token') || null;
+    let lastActivity = Date.now();
+    const TIMEOUT_MS = 60 * 60 * 1000; // 60 minutes
+
+    function updateStatusUI() {
+        const container = document.getElementById('auth-status');
+        if (!container) return;
+
+        if (authToken) {
+            container.innerHTML = `
+                <div class="auth-user-badge">
+                    <i data-lucide="user-check" style="width: 14px; height: 14px;"></i>
+                    Modo Editor
+                </div>
+                <button id="auth-logout-btn" class="auth-logout-btn" title="Cerrar Sesión">
+                    <i data-lucide="log-out" style="width: 16px; height: 16px;"></i>
+                </button>
+            `;
+            document.getElementById('auth-logout-btn').onclick = () => {
+                clearToken();
+                location.reload();
+            };
+        } else {
+            container.innerHTML = `
+                <a id="auth-login-link" class="auth-login-link">
+                    <i data-lucide="log-in" style="width: 14px; height: 14px; vertical-align: middle; margin-right: 4px;"></i>
+                    Acceso Editor
+                </a>
+            `;
+            document.getElementById('auth-login-link').onclick = () => showLoginPrompt();
+        }
+
+        if (window.lucide) lucide.createIcons();
+    }
 
     function showLoginPrompt() {
         const modal = document.getElementById('login-modal');
@@ -19,41 +52,93 @@ window.Auth = (function () {
         }
     }
 
-    // Initialize listeners
+    function clearToken() {
+        authToken = null;
+        sessionStorage.removeItem('litmap_token');
+        updateStatusUI();
+    }
+
+    // Inactivity check
+    function checkTimeout() {
+        if (authToken && (Date.now() - lastActivity > TIMEOUT_MS)) {
+            console.log("Session timed out due to inactivity.");
+            clearToken();
+            alert("Tu sesión ha expirado por inactividad.");
+            location.reload();
+        }
+    }
+
+    // Activity tracker
+    function resetActivity() {
+        lastActivity = Date.now();
+    }
+
+    // Custom Confirmation Helper
+    async function showConfirm(message) {
+        return new Promise((resolve) => {
+            const modal = document.getElementById('confirm-modal');
+            const msgEl = document.getElementById('confirm-message');
+            const okBtn = document.getElementById('confirm-ok-btn');
+            const cancelBtn = document.getElementById('confirm-cancel-btn');
+            const closeX = document.getElementById('confirm-cancel-x');
+
+            msgEl.textContent = message;
+            modal.classList.add('active');
+
+            const cleanup = (result) => {
+                modal.classList.remove('active');
+                okBtn.onclick = null;
+                cancelBtn.onclick = null;
+                closeX.onclick = null;
+                resolve(result);
+            };
+
+            okBtn.onclick = () => cleanup(true);
+            cancelBtn.onclick = () => cleanup(false);
+            closeX.onclick = () => cleanup(false);
+        });
+    }
+
+    // Initial setup
     document.addEventListener('DOMContentLoaded', () => {
         const loginForm = document.getElementById('login-form');
-        const cancelButton = document.getElementById('login-cancel');
+        const loginCancel = document.getElementById('login-cancel');
 
         if (loginForm) {
-            loginForm.addEventListener('submit', (e) => {
+            loginForm.onsubmit = (e) => {
                 e.preventDefault();
                 const token = document.getElementById('login-token').value;
                 if (token) {
                     authToken = token;
-                    localStorage.setItem('litmap_token', token);
+                    sessionStorage.setItem('litmap_token', token);
                     hideLoginPrompt();
-                    // Optionally reload or retry the last failed request
-                    location.reload(); // Simple way to ensure all states are reset
+                    location.reload();
                 }
-            });
+            };
         }
 
-        if (cancelButton) {
-            cancelButton.addEventListener('click', hideLoginPrompt);
+        if (loginCancel) {
+            loginCancel.onclick = hideLoginPrompt;
         }
+
+        // Monitoring
+        document.addEventListener('mousedown', resetActivity);
+        document.addEventListener('keydown', resetActivity);
+        setInterval(checkTimeout, 30000); // Check every 30s
+
+        updateStatusUI();
     });
 
     return {
         getToken: () => authToken,
         setToken: (token) => {
             authToken = token;
-            localStorage.setItem('litmap_token', token);
+            sessionStorage.setItem('litmap_token', token);
+            updateStatusUI();
         },
-        clearToken: () => {
-            authToken = null;
-            localStorage.removeItem('litmap_token');
-        },
+        clearToken,
         showLoginPrompt,
-        hideLoginPrompt
+        hideLoginPrompt,
+        showConfirm
     };
 })();

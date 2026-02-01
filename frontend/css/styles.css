@@ -45,7 +45,7 @@ body {
     font-size: 24px;
     font-weight: 700;
     /* 🟢 NUEVO: Color sólido blanco para mejor legibilidad */
-    color: #fff; 
+    color: #fff;
     margin: 0;
     /* 🔴 ELIMINAMOS el degradado del texto, o lo hacemos muy sutil si se desea */
     /* background: linear-gradient(135deg, #00B4D8 0%, #0096b8 100%);
@@ -62,15 +62,17 @@ body {
     border: none;
     border-radius: 8px;
     cursor: pointer;
-    
+
     /* 🟢 FLEXBOX PARA CENTRAR */
     display: flex;
     align-items: center;
     justify-content: center;
-    
+
     transition: all 0.3s;
-    margin-right: 16px; /* Espacio entre botón y título */
-    padding: 0; /* Resetear padding nativo */
+    margin-right: 16px;
+    /* Espacio entre botón y título */
+    padding: 0;
+    /* Resetear padding nativo */
 }
 
 .sidebar-toggle-btn:hover {
@@ -97,7 +99,8 @@ body {
     height: 2px;
     background: #00B4D8;
     transition: all 0.3s;
-    left: 0; /* Asegura que empiecen desde la izquierda */
+    left: 0;
+    /* Asegura que empiecen desde la izquierda */
 }
 
 .hamburger::before {
@@ -110,7 +113,8 @@ body {
 
 /* ESTADOS COLAPSADOS (X) */
 .sidebar.collapsed .hamburger {
-    background: transparent; /* Oculta la del medio */
+    background: transparent;
+    /* Oculta la del medio */
 }
 
 .sidebar.collapsed .hamburger::before {
@@ -238,15 +242,18 @@ body {
 /* Forzamos que la lista de proyectos en el sidebar sea vertical */
 #district-projects-list {
     display: flex;
-    flex-direction: column; /* Uno debajo del otro */
-    gap: 16px;              /* Espacio entre tarjetas */
+    flex-direction: column;
+    /* Uno debajo del otro */
+    gap: 16px;
+    /* Espacio entre tarjetas */
     width: 100%;
 }
 
 /* Aseguramos que la tarjeta ocupe todo el ancho disponible */
 #district-projects-list .project-card {
     width: 100%;
-    margin: 0; /* Reseteamos márgenes si los hubiera */
+    margin: 0;
+    /* Reseteamos márgenes si los hubiera */
 }
 
 /* ==============================================
@@ -325,9 +332,11 @@ body {
 
 /* Estilo de la etiqueta individual (Pill) */
 .district-label {
-    display: inline-flex;       /* Para alinear texto e ícono */
+    display: inline-flex;
+    /* Para alinear texto e ícono */
     align-items: center;
-    gap: 6px;                   /* Espacio entre nombre y X */
+    gap: 6px;
+    /* Espacio entre nombre y X */
     color: #00B4D8;
     font-weight: 600;
     font-size: 13px;
@@ -336,9 +345,12 @@ body {
     border: 1px solid rgba(0, 180, 216, 0.3);
     border-radius: 20px;
     white-space: nowrap;
-    cursor: pointer;            /* Indicador de click */
-    transition: all 0.2s ease;  /* Animación suave */
-    user-select: none;          /* Evita seleccionar el texto al hacer click */
+    cursor: pointer;
+    /* Indicador de click */
+    transition: all 0.2s ease;
+    /* Animación suave */
+    user-select: none;
+    /* Evita seleccionar el texto al hacer click */
 }
 
 /* Efecto al pasar el mouse: Rojo para indicar eliminación */
@@ -350,7 +362,8 @@ body {
 
 /* Pequeña X visual */
 .district-label::after {
-    content: "×"; /* Símbolo de multiplicación */
+    content: "×";
+    /* Símbolo de multiplicación */
     font-size: 16px;
     line-height: 1;
     font-weight: 400;
@@ -380,9 +393,12 @@ body {
    LEAFLET TOOLTIPS (Dark Mode)
 ============================================== */
 .custom-tooltip {
-    background-color: #1e293b !important; /* Fondo oscuro */
-    border: 1px solid #00B4D8 !important; /* Borde azul cyan */
-    color: #e5e7eb !important;            /* Texto claro */
+    background-color: #1e293b !important;
+    /* Fondo oscuro */
+    border: 1px solid #00B4D8 !important;
+    /* Borde azul cyan */
+    color: #e5e7eb !important;
+    /* Texto claro */
     border-radius: 6px !important;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3) !important;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
@@ -396,7 +412,8 @@ body {
 .leaflet-tooltip-bottom:before,
 .leaflet-tooltip-left:before,
 .leaflet-tooltip-right:before {
-    border-top-color: #00B4D8 !important; /* Colorear la flecha si aparece */
+    border-top-color: #00B4D8 !important;
+    /* Colorear la flecha si aparece */
 }
 
 /* ==============================================
@@ -585,11 +602,12 @@ path.leaflet-interactive:focus {
     cursor: pointer;
     transition: all 0.3s;
     position: relative;
-    
+
     /* 🟢 ESTO EVITA EL SOLAPAMIENTO */
     display: flex;
-    flex-direction: column; 
-    min-height: 220px; /* Altura mínima para uniformidad */
+    flex-direction: column;
+    min-height: 220px;
+    /* Altura mínima para uniformidad */
 }
 
 /* Descripción: Ocupa el espacio disponible y empuja lo de abajo */
@@ -597,8 +615,10 @@ path.leaflet-interactive:focus {
     color: #94a3b8;
     font-size: 14px;
     line-height: 1.5;
-    margin-bottom: 20px; /* Espacio seguro antes del meta */
-    flex-grow: 1;        /* Empuja el footer hacia abajo */
+    margin-bottom: 20px;
+    /* Espacio seguro antes del meta */
+    flex-grow: 1;
+    /* Empuja el footer hacia abajo */
 }
 
 /* Meta (Estado y Fecha) */
@@ -609,14 +629,17 @@ path.leaflet-interactive:focus {
     padding-top: 16px;
     border-top: 1px solid #334155;
     font-size: 12px;
-    margin-top: auto; /* Se ancla al fondo de la descripción */
-    flex-wrap: wrap;  /* Si falta espacio, baja la fecha */
+    margin-top: auto;
+    /* Se ancla al fondo de la descripción */
+    flex-wrap: wrap;
+    /* Si falta espacio, baja la fecha */
     gap: 10px;
 }
 
 /* Distritos (Pills) */
 .district-badges {
-    margin-top: 12px; /* Espacio claro entre Meta y Distritos */
+    margin-top: 12px;
+    /* Espacio claro entre Meta y Distritos */
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
@@ -755,9 +778,9 @@ path.leaflet-interactive:focus {
 /* Detalle expandible dentro de la grilla */
 .project-details-section {
     /* Esto es la clave: ocupa desde la columna 1 hasta la última (-1) */
-    grid-column: 1 / -1; 
+    grid-column: 1 / -1;
     width: 100%;
-    
+
     /* Mantenemos tus estilos visuales previos */
     margin-top: 20px;
     margin-bottom: 20px;
@@ -877,11 +900,12 @@ path.leaflet-interactive:focus {
 }
 
 @keyframes fadeIn {
-    from { 
-        opacity: 0; 
+    from {
+        opacity: 0;
     }
-    to { 
-        opacity: 1; 
+
+    to {
+        opacity: 1;
     }
 }
 
@@ -904,6 +928,7 @@ path.leaflet-interactive:focus {
         transform: translateY(30px);
         opacity: 0;
     }
+
     to {
         transform: translateY(0);
         opacity: 1;
@@ -1003,8 +1028,8 @@ path.leaflet-interactive:focus {
 
 /* Fix para Dropdowns en Modal */
 .form-select option {
-    background-color: #1e293b; 
-    color: #fff;            
+    background-color: #1e293b;
+    color: #fff;
     padding: 10px;
 }
 
@@ -1156,7 +1181,7 @@ path.leaflet-interactive:focus {
 }
 
 /* Animation for multiple toasts */
-.toast-notification + .toast-notification {
+.toast-notification+.toast-notification {
     margin-top: 12px;
 }
 
@@ -1265,7 +1290,8 @@ path.leaflet-interactive:focus {
 
 /* NUEVO: Inactivo Color */
 .stat-inactive .lucide {
-    color: #f59e0b; /* Ámbar */
+    color: #f59e0b;
+    /* Ámbar */
 }
 
 .stat-completed .lucide {
@@ -1281,6 +1307,7 @@ path.leaflet-interactive:focus {
     from {
         transform: rotate(0deg);
     }
+
     to {
         transform: rotate(360deg);
     }
@@ -1300,13 +1327,17 @@ path.leaflet-interactive:focus {
     box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
     position: relative;
     overflow: hidden;
-    margin-bottom: 24px; /* Espacio debajo */
+    margin-bottom: 24px;
+    /* Espacio debajo */
 }
 
 .lima-hero-card::before {
     content: '';
     position: absolute;
-    top: 0; left: 0; right: 0; height: 4px;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
     background: linear-gradient(90deg, #00B4D8, #0096b8);
 }
 
@@ -1339,13 +1370,15 @@ path.leaflet-interactive:focus {
 .district-grid-list {
     display: grid;
     /* Esto crea columnas automáticas de mínimo 130px */
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); 
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
     gap: 10px;
 }
 
 .district-mini-card {
-    background: #334155;       /* Fondo de tarjeta */
-    border: 1px solid #475569; /* Borde sutil */
+    background: #334155;
+    /* Fondo de tarjeta */
+    border: 1px solid #475569;
+    /* Borde sutil */
     border-radius: 8px;
     padding: 10px;
     cursor: pointer;
@@ -1384,21 +1417,90 @@ path.leaflet-interactive:focus {
         padding: 16px;
         gap: 12px;
     }
-    
+
     .tab-navigation {
         width: 100%;
         justify-content: center;
     }
-    
+
     .sidebar {
         position: absolute;
         height: calc(100vh - 70px);
         z-index: 1000;
     }
-    
+
     .projects-grid {
         grid-template-columns: 1fr;
     }
+}
+
+/* ==============================================
+   AUTH STATUS INDICATOR (Header)
+   ============================================== */
+.auth-status-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.auth-user-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.auth-logout-btn {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 13px;
+    padding: 4px;
+    transition: color 0.3s;
+}
+
+.auth-logout-btn:hover {
+    color: #ef4444;
+}
+
+.auth-login-link {
+    color: #94a3b8;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.auth-login-link:hover {
+    color: #00B4D8;
+}
+
+/* ==============================================
+   MODAL OVERLAY (Ensure high z-index)
+   ============================================== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.9);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    backdrop-filter: blur(8px);
+}
+
+.modal-overlay.active {
+    display: flex;
 }
 
 /* ==============================================
@@ -1496,8 +1598,15 @@ path.leaflet-interactive:focus {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 .login-error {
