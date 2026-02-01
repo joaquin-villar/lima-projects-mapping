@@ -24,6 +24,7 @@ window.Drawings = (function () {
                     const geo = typeof d.geojson === 'string' ? JSON.parse(d.geojson) : d.geojson;
 
                     const geoLayer = L.geoJSON(geo, {
+                        pane: targetLayer === window.DistrictMap?.getDrawingLayer() ? "drawingPane" : "overlayPane",
                         style: {
                             color: isHighlighted ? "#22c55e" : "#00B4D8",
                             weight: isHighlighted ? 5 : 3,
@@ -32,6 +33,7 @@ window.Drawings = (function () {
                         },
                         pointToLayer: (feature, latlng) => {
                             return L.circleMarker(latlng, {
+                                pane: targetLayer === window.DistrictMap?.getDrawingLayer() ? "drawingPane" : "overlayPane",
                                 radius: isHighlighted ? 10 : 7,
                                 fillColor: isHighlighted ? "#22c55e" : "#00B4D8",
                                 color: "#fff",

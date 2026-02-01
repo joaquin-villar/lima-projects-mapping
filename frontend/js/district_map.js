@@ -4,7 +4,7 @@ window.DistrictMap = (function () {
     let drawingLayer = null;
     let tileLayer = null;
     let districtMaskLayer = null;
-    
+
     // Guardamos las capas de los bordes blancos para poder limpiarlas
     let activeBorderLayers = [];
 
@@ -18,7 +18,11 @@ window.DistrictMap = (function () {
         // Panel especial para la máscara oscura (z-index alto)
         map.createPane("maskPane");
         map.getPane("maskPane").style.zIndex = 650;
-        map.getPane("maskPane").style.pointerEvents = "none"; // Dejar pasar clicks al mapa
+        map.getPane("maskPane").style.pointerEvents = "none";
+
+        // Panel para dibujos (encima de la máscara)
+        map.createPane("drawingPane");
+        map.getPane("drawingPane").style.zIndex = 700;
 
         setBaseLayer("satellite");
         setupDrawingTools();
@@ -34,11 +38,11 @@ window.DistrictMap = (function () {
         const drawControl = new L.Control.Draw({
             edit: { featureGroup: drawingLayer },
             draw: {
-                polygon: true,
-                polyline: true,
-                rectangle: true,
-                circle: true,
-                marker: true,
+                polygon: { shapeOptions: { pane: "drawingPane" } },
+                polyline: { shapeOptions: { pane: "drawingPane" } },
+                rectangle: { shapeOptions: { pane: "drawingPane" } },
+                circle: { shapeOptions: { pane: "drawingPane" } },
+                marker: { pane: "drawingPane" },
                 circlemarker: false
             }
         });
@@ -74,11 +78,11 @@ window.DistrictMap = (function () {
     function focusOnSelectedDistrict() {
         const rawSelection = AppState.selectedDistrict;
         const geo = AppState.districtsGeoJSON;
-        
+
         // Limpiar capas anteriores
         activeBorderLayers.forEach(l => map.removeLayer(l));
         activeBorderLayers = [];
-        
+
         if (districtMaskLayer) {
             map.removeLayer(districtMaskLayer);
             districtMaskLayer = null;
@@ -87,12 +91,12 @@ window.DistrictMap = (function () {
         if (!rawSelection || !geo) return;
 
         // 1. Obtener lista de nombres (maneja "Callao" y "Callao, Lima")
-        const districtNames = rawSelection.includes(",") 
-            ? rawSelection.split(",").map(s => s.trim()) 
+        const districtNames = rawSelection.includes(",")
+            ? rawSelection.split(",").map(s => s.trim())
             : [rawSelection];
 
         // 2. Buscar todos los features correspondientes en el GeoJSON
-        const features = geo.features.filter(f => 
+        const features = geo.features.filter(f =>
             districtNames.includes(f.properties.distrito)
         );
 
@@ -130,7 +134,7 @@ window.DistrictMap = (function () {
         // Leaflet usa [Lat, Lng], GeoJSON usa [Lng, Lat]. 
         // L.geoJSON maneja la conversión, pero si dibujamos a mano:
         // coordinates: [ [ [lng, lat] ... outer ring ], [ [lng, lat] ... inner hole ] ]
-        
+
         const world = [
             [-180, -90],
             [-180, 90],
@@ -144,11 +148,11 @@ window.DistrictMap = (function () {
 
         features.forEach(feature => {
             const coords = feature.geometry.coordinates;
-            
+
             if (feature.geometry.type === "Polygon") {
                 // Un polígono simple: coordinates[0] es el anillo exterior
                 allHoles.push(coords[0]);
-            } 
+            }
             else if (feature.geometry.type === "MultiPolygon") {
                 // MultiPolígono: coordinates es un array de polígonos
                 // Cada polígono tiene [outerRing, hole1, hole2...]
