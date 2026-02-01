@@ -1408,29 +1408,173 @@ path.leaflet-interactive:focus {
 }
 
 /* ==============================================
-   RESPONSIVE
+   RESPONSIVE IMPROVEMENTS
 ============================================== */
+
+/* Tablet & Large Mobile */
 @media (max-width: 1024px) {
     .header-content {
         flex-direction: column;
         height: auto;
-        padding: 16px;
+        padding: 12px 20px;
         gap: 12px;
     }
 
     .tab-navigation {
         width: 100%;
         justify-content: center;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding-bottom: 4px;
+        -webkit-overflow-scrolling: touch;
     }
 
     .sidebar {
         position: absolute;
-        height: calc(100vh - 70px);
+        height: calc(100vh - 120px);
+        /* Adjust for double header */
+        top: 120px;
         z-index: 1000;
+        width: 300px;
     }
 
     .projects-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+    }
+}
+
+/* Medium Mobile */
+@media (max-width: 768px) {
+    .projects-content {
+        padding: 24px 16px;
+    }
+
+    .projects-header {
+        margin-bottom: 24px;
+    }
+
+    .projects-header h1 {
+        font-size: 28px;
+    }
+
+    .app-title {
+        font-size: 20px;
+    }
+
+    .tab-button {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+}
+
+/* Small Mobile */
+@media (max-width: 500px) {
+    .header-content {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        padding: 8px 12px;
+        gap: 4px;
+        height: auto;
+    }
+
+    .header-left {
+        grid-column: 1;
+    }
+
+    .auth-status-container {
+        grid-column: 2;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .sidebar-toggle-btn {
+        margin-right: 8px;
+        width: 36px;
+        height: 36px;
+    }
+
+    .app-title {
+        font-size: 16px;
+    }
+
+    .tab-navigation {
+        grid-column: 1 / span 2;
+        gap: 2px;
+        justify-content: space-between;
+        width: 100%;
+        margin-top: 4px;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        padding-top: 4px;
+    }
+
+    .tab-button {
+        flex: 1;
+        padding: 6px 2px;
+        font-size: 11px;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+        background: transparent !important;
+    }
+
+    .tab-button.active::after {
+        width: 40%;
+        height: 2px;
+        bottom: 0;
+    }
+
+    .sidebar {
+        top: 96px;
+        /* Reduced since header is more compact */
+        height: calc(100vh - 96px);
+    }
+
+    /* Make cards more compact */
+    .project-card {
+        padding: 16px;
+        min-height: 160px;
+    }
+
+    .project-name {
+        font-size: 18px;
+        margin-bottom: 8px;
+    }
+
+    .project-description {
+        font-size: 13px;
+        margin-bottom: 12px;
+        /* Limit to 3 lines on mobile */
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        min-height: auto;
+    }
+
+    .project-meta {
+        padding-top: 12px;
+    }
+
+    .status-badge {
+        padding: 4px 10px;
+        font-size: 10px;
+    }
+
+    .projects-grid {
+        /* Allow 2 cards on small screen if they fit, or 1 but compact */
         grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    /* Ensure details card also fits */
+    .details-card {
+        padding: 20px;
+    }
+
+    .details-header h2 {
+        font-size: 20px;
     }
 }
 
