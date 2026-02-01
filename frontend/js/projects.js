@@ -355,7 +355,10 @@ window.Projects = (function () {
             notify(`Proyecto "${deletedName}" eliminado`, "success");
         } catch (err) {
             console.error("Delete Error:", err);
-            notify("Error eliminando proyecto: " + (err.message || "Error desconocido"), "error");
+            // Only show error if it wasn't already handled by the API auth interceptor
+            if (!err.message.includes('Auth Error')) {
+                notify("Error eliminando proyecto: " + (err.message || "Error desconocido"), "error");
+            }
         } finally {
             isDeleting = false;
         }

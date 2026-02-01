@@ -4,7 +4,7 @@
 // MODAL CONTROLLER - CREATE & EDIT
 // ================================================
 
-let projectBeingEditedId = null; 
+let projectBeingEditedId = null;
 
 /**
  * Opens the project modal
@@ -18,7 +18,7 @@ function openProjectModal(data) {
 
     // Resetear estado
     projectBeingEditedId = null;
-    
+
     // 1. POBLAR EL SELECTOR DE DISTRITOS
     // Obtenemos la lista maestra desde el AppState (GeoJSON cargado)
     if (window.AppState && window.AppState.districtsGeoJSON) {
@@ -35,7 +35,7 @@ function openProjectModal(data) {
     const setSelectedDistricts = (districtsToSelect) => {
         // Convertimos a array si viene como string único
         const targets = Array.isArray(districtsToSelect) ? districtsToSelect : [districtsToSelect];
-        
+
         Array.from(districtSelect.options).forEach(option => {
             option.selected = targets.includes(option.value);
         });
@@ -46,10 +46,10 @@ function openProjectModal(data) {
         // --- MODO EDICIÓN ---
         const project = data;
         projectBeingEditedId = project.id;
-        
+
         title.innerHTML = '<i data-lucide="edit-3"></i> Editar Proyecto';
         submitBtn.innerHTML = '<i data-lucide="save"></i> Guardar Cambios';
-        
+
         document.getElementById('modal-project-name').value = project.name;
         document.getElementById('modal-project-desc').value = project.description || '';
         document.getElementById('modal-project-status').value = project.status;
@@ -60,8 +60,8 @@ function openProjectModal(data) {
     } else {
         // --- MODO CREACIÓN ---
         // data es el nombre del distrito (o lista separada por comas)
-        const districtInput = data; 
-        
+        const districtInput = data;
+
         title.innerHTML = '<i data-lucide="map-pin"></i> Nuevo Proyecto';
         submitBtn.innerHTML = '<i data-lucide="check"></i> Crear Proyecto';
 
@@ -70,16 +70,16 @@ function openProjectModal(data) {
         document.getElementById('modal-project-status').value = 'active';
 
         // Marcar el/los distritos seleccionados en el mapa
-        const districtsToSelect = districtInput.includes(',') 
-            ? districtInput.split(',').map(d => d.trim()) 
+        const districtsToSelect = districtInput.includes(',')
+            ? districtInput.split(',').map(d => d.trim())
             : [districtInput];
-            
+
         setSelectedDistricts(districtsToSelect);
     }
-    
+
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
-    
+
     if (window.lucide) lucide.createIcons();
 }
 
@@ -87,7 +87,7 @@ function closeProjectModal() {
     const modal = document.getElementById('project-modal');
     modal.classList.remove('active');
     document.body.style.overflow = '';
-    projectBeingEditedId = null; 
+    projectBeingEditedId = null;
 }
 
 async function handleModalSubmit() {
@@ -96,7 +96,7 @@ async function handleModalSubmit() {
     const description = document.getElementById('modal-project-desc').value.trim();
     const status = document.getElementById('modal-project-status').value;
     const districtSelect = document.getElementById('modal-project-districts');
-    
+
     // Obtener distritos seleccionados del <select multiple>
     const selectedDistricts = Array.from(districtSelect.selectedOptions).map(opt => opt.value);
 
@@ -136,20 +136,23 @@ async function handleModalSubmit() {
                 showNotification(`Proyecto "${name}" creado`, 'success');
             }
         }
-        
+
         closeProjectModal();
 
     } catch (error) {
         console.error('Error submitting form:', error);
-        showNotification('Error al procesar. Verifica los datos.', 'error');
+        // Only show generic error if it wasn't already handled by the API auth interceptor
+        if (!error.message.includes('Auth Error')) {
+            showNotification('Error al procesar. Verifica los datos.', 'error');
+        }
     } finally {
         submitBtn.disabled = false;
         // Restaurar icono si el modal sigue abierto
         if (document.getElementById('project-modal').classList.contains('active')) {
-             submitBtn.innerHTML = projectBeingEditedId 
-                ? '<i data-lucide="save"></i> Guardar Cambios' 
+            submitBtn.innerHTML = projectBeingEditedId
+                ? '<i data-lucide="save"></i> Guardar Cambios'
                 : '<i data-lucide="check"></i> Crear Proyecto';
-             if (window.lucide) lucide.createIcons();
+            if (window.lucide) lucide.createIcons();
         }
     }
 }
@@ -157,7 +160,7 @@ async function handleModalSubmit() {
 function showNotification(message, type = 'success') {
     const existing = document.querySelector('.toast-notification');
     if (existing) existing.remove();
-    
+
     const notification = document.createElement('div');
     notification.className = `toast-notification toast-${type}`;
     notification.innerHTML = `
@@ -166,10 +169,10 @@ function showNotification(message, type = 'success') {
             <span>${message}</span>
         </div>
     `;
-    
+
     document.body.appendChild(notification);
     if (window.lucide) lucide.createIcons();
-    
+
     setTimeout(() => notification.classList.add('show'), 10);
     setTimeout(() => {
         notification.classList.remove('show');
@@ -180,19 +183,19 @@ function showNotification(message, type = 'success') {
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('modal-close-btn')?.addEventListener('click', closeProjectModal);
     document.getElementById('modal-cancel-btn')?.addEventListener('click', closeProjectModal);
-    
+
     document.getElementById('modal-submit-btn')?.addEventListener('click', (e) => {
         e.preventDefault();
         handleModalSubmit();
     });
-    
+
     const modalOverlay = document.getElementById('project-modal');
     if (modalOverlay) {
         modalOverlay.addEventListener('click', (e) => {
             if (e.target === modalOverlay) closeProjectModal();
         });
     }
-    
+
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             const modal = document.getElementById('project-modal');

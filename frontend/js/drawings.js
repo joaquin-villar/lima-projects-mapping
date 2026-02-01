@@ -1,6 +1,6 @@
 // frontend/js/drawings.js
 window.Drawings = (function () {
-    
+
     // Helper para notificaciones (consistente con el resto de la app)
     function notify(message, type = 'success') {
         if (window.ProjectModal && typeof window.ProjectModal.showNotification === 'function') {
@@ -25,7 +25,7 @@ window.Drawings = (function () {
             // Dibujamos
             drawings.forEach(d => {
                 const geo = JSON.parse(d.geojson);
-                
+
                 // Agregamos a ambos mapas para mantener sincronía visual
                 if (overviewLayer) L.geoJSON(geo).addTo(overviewLayer);
                 if (detailLayer) L.geoJSON(geo).addTo(detailLayer);
@@ -38,7 +38,7 @@ window.Drawings = (function () {
 
     async function saveCurrentDrawings() {
         const project = Projects.getCurrentProject();
-        
+
         // 1. Validación: Proyecto seleccionado
         if (!project) {
             return notify("Selecciona un proyecto primero (haz clic en una tarjeta)", "error");
@@ -76,17 +76,20 @@ window.Drawings = (function () {
             // Asumiremos que el usuario quiere guardar LO QUE VE.
             // Si tu backend solo agrega, esto duplicará.
             // Para un MVP de dibujo, lo ideal es: Borrar todo lo del proyecto -> Insertar lo nuevo.
-            
+
             // Nota: Como tu backend actual solo tiene "add", vamos a asumir adición
             // O implementar una lógica de "replace" en el futuro.
-            
+
             await Api.post(`/api/projects/${project.id}/drawings/batch`, payload);
-            
+
             notify(`Dibujos guardados exitosamente en "${project.name}"`, "success");
-            
+
         } catch (err) {
             console.error(err);
-            notify("Error guardando dibujos", "error");
+            // Only show error if it wasn't already handled by the API auth interceptor
+            if (!err.message.includes('Auth Error')) {
+                notify("Error guardando dibujos", "error");
+            }
         }
     }
 
