@@ -24,7 +24,7 @@ body {
     background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
     border-bottom: 2px solid #334155;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-    z-index: 2000;
+    z-index: 3000;
 }
 
 .header-content {
@@ -1434,7 +1434,7 @@ path.leaflet-interactive:focus {
         position: absolute;
         height: 100%;
         top: 0;
-        z-index: 1000;
+        z-index: 2500;
         width: 300px;
     }
 
