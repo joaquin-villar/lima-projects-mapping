@@ -383,6 +383,36 @@ window.Projects = (function () {
         return div.innerHTML;
     }
 
+    function closeProjectDetails() {
+        currentProject = null;
+        const detailsSection = document.getElementById("project-details-section");
+        if (detailsSection) {
+            detailsSection.style.display = "none";
+        }
+        document.querySelectorAll(".project-card").forEach(c => c.classList.remove("active"));
+
+        if (window.GeneralMap) window.GeneralMap.getDrawingLayer().clearLayers();
+        if (window.DistrictMap) window.DistrictMap.getDrawingLayer().clearLayers();
+    }
+
+    function viewProjectOnMap() {
+        if (!currentProject) return;
+
+        if (currentProject.districts && currentProject.districts.length > 0) {
+            if (window.GeneralMap) {
+                window.GeneralMap.deselectAll(false);
+                currentProject.districts.forEach(distrito => {
+                    window.GeneralMap.toggleDistrict(distrito);
+                });
+            }
+            if (window.UI) UI.switchTab("detail");
+            const distStr = currentProject.districts.join(", ");
+            notify(`Visualizando ${currentProject.name} en: ${distStr}`, "success");
+        } else {
+            notify("Este proyecto no tiene distritos asignados", "error");
+        }
+    }
+
     return {
         loadProjects,
         createProject,
@@ -393,34 +423,7 @@ window.Projects = (function () {
         deleteCurrentProject,
         getCurrentProject: () => currentProject,
 
-        viewProjectOnMap() {
-            if (!currentProject) return;
-
-            if (currentProject.districts && currentProject.districts.length > 0) {
-                if (window.GeneralMap) {
-                    window.GeneralMap.deselectAll(false);
-                    currentProject.districts.forEach(distrito => {
-                        window.GeneralMap.toggleDistrict(distrito);
-                    });
-                }
-                if (window.UI) UI.switchTab("detail");
-                const distStr = currentProject.districts.join(", ");
-                notify(`Visualizando ${currentProject.name} en: ${distStr}`, "success");
-            } else {
-                notify("Este proyecto no tiene distritos asignados", "error");
-            }
-        },
-
-        closeProjectDetails() {
-            currentProject = null;
-            const detailsSection = document.getElementById("project-details-section");
-            if (detailsSection) {
-                detailsSection.style.display = "none";
-            }
-            document.querySelectorAll(".project-card").forEach(c => c.classList.remove("active"));
-
-            if (window.GeneralMap) window.GeneralMap.getDrawingLayer().clearLayers();
-            if (window.DistrictMap) window.DistrictMap.getDrawingLayer().clearLayers();
-        }
+        viewProjectOnMap,
+        closeProjectDetails
     };
 })();
