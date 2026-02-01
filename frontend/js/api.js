@@ -1,35 +1,52 @@
 // frontend/js/api.js
 window.Api = {
+    async request(url, options = {}) {
+        const token = window.Auth ? window.Auth.getToken() : null;
+
+        const headers = {
+            "Content-Type": "application/json",
+            ...options.headers
+        };
+
+        if (token) {
+            headers["Authorization"] = `Bearer ${token}`;
+        }
+
+        const res = await fetch(url, { ...options, headers });
+
+        if (res.status === 401 || res.status === 403) {
+            if (window.Auth) {
+                window.Auth.showLoginPrompt();
+            }
+            throw new Error(`Auth Error: ${res.status}`);
+        }
+
+        if (!res.ok) throw new Error(`${options.method || 'GET'} ${url} -> ${res.status}`);
+
+        // Handle empty responses (like from DELETE)
+        const text = await res.text();
+        return text ? JSON.parse(text) : {};
+    },
+
     async get(url) {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`GET ${url} -> ${res.status}`);
-        return res.json();
+        return this.request(url, { method: "GET" });
     },
 
     async post(url, data) {
-        const res = await fetch(url, {
+        return this.request(url, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data)
         });
-        if (!res.ok) throw new Error(`POST ${url} -> ${res.status}`);
-        return res.json();
     },
 
-    // 🟢 ESTE ES EL MÉTODO QUE FALTABA
     async put(url, data) {
-        const res = await fetch(url, {
+        return this.request(url, {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data)
         });
-        if (!res.ok) throw new Error(`PUT ${url} -> ${res.status}`);
-        return res.json();
     },
 
     async del(url) {
-        const res = await fetch(url, { method: "DELETE" });
-        if (!res.ok) throw new Error(`DELETE ${url} -> ${res.status}`);
-        return res.json();
+        return this.request(url, { method: "DELETE" });
     }
 };

@@ -1400,3 +1400,109 @@ path.leaflet-interactive:focus {
         grid-template-columns: 1fr;
     }
 }
+
+/* ==============================================
+   LOGIN MODAL
+   ============================================== */
+.login-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.9);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    backdrop-filter: blur(8px);
+}
+
+.login-modal-overlay.active {
+    display: flex;
+}
+
+.login-card {
+    background: #1e293b;
+    width: 100%;
+    max-width: 400px;
+    padding: 32px;
+    border-radius: 16px;
+    border: 2px solid #334155;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    text-align: center;
+}
+
+.login-card-header {
+    margin-bottom: 24px;
+}
+
+.login-icon {
+    width: 64px;
+    height: 64px;
+    background: rgba(0, 180, 216, 0.1);
+    color: #00B4D8;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+}
+
+.login-card h2 {
+    font-size: 24px;
+    color: #fff;
+    margin-bottom: 8px;
+}
+
+.login-card p {
+    color: #94a3b8;
+    font-size: 14px;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 24px;
+}
+
+.login-input-group {
+    text-align: left;
+}
+
+.login-input-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #94a3b8;
+}
+
+.login-btn {
+    background: linear-gradient(135deg, #00B4D8 0%, #0096b8 100%);
+    color: white;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 180, 216, 0.3);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.login-error {
+    color: #ef4444;
+    font-size: 13px;
+    margin-top: 12px;
+    display: none;
+}

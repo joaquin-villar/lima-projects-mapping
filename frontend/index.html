@@ -277,10 +277,43 @@
         </div>
     </div>
 
+    <!-- 🟢 LOGIN MODAL -->
+    <div id="login-modal" class="login-modal-overlay">
+        <div class="login-card">
+            <div class="login-card-header">
+                <div class="login-icon">
+                    <i data-lucide="lock" style="width: 32px; height: 32px;"></i>
+                </div>
+                <h2>Iniciar Sesión</h2>
+                <p>Necesitas permisos de editor para realizar esta acción.</p>
+            </div>
+
+            <form id="login-form" class="login-form">
+                <div class="login-input-group">
+                    <label for="login-token">Token de Acceso (JWT)</label>
+                    <input type="password" id="login-token" class="form-input" placeholder="Ingresa tu token de editor..." required>
+                </div>
+                
+                <button type="submit" class="login-btn">
+                    Confirmar Identidad
+                </button>
+                
+                <div id="login-error" class="login-error">
+                    Token inválido o sin permisos suficientes.
+                </div>
+                
+                <button type="button" id="login-cancel" class="btn-modal btn-modal-cancel" style="margin-top: 8px; width: 100%;">
+                    Cancelar
+                </button>
+            </form>
+        </div>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
 
     <script src="/static/js/api.js"></script>
+    <script src="/static/js/auth.js"></script>
     <script src="/static/js/general_map.js"></script>
     <script src="/static/js/district_map.js"></script>
     <script src="/static/js/drawings.js"></script>
