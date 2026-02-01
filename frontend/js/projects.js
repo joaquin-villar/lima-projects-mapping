@@ -329,17 +329,24 @@ window.Projects = (function () {
     /* ---------------------------------------------------------
        DELETE PROJECT
     --------------------------------------------------------- */
+    let isDeleting = false;
     async function deleteCurrentProject() {
-        if (!currentProject) return;
+        if (!currentProject || isDeleting) return;
 
         const confirmed = await window.Auth.showConfirm(`¿Estás seguro de que deseas eliminar permanentemente el proyecto "${currentProject.name}"?`);
         if (!confirmed) return;
 
-        try {
-            const deletedName = currentProject.name;
-            await Api.del(`/api/projects/${currentProject.id}`);
+        isDeleting = true;
+        const deletedId = currentProject.id;
+        const deletedName = currentProject.name;
 
+        try {
+            await Api.del(`/api/projects/${deletedId}`);
+
+            // Importante: Limpiar estado ANTES de recargar
+            currentProject = null;
             closeProjectDetails();
+
             await loadProjects();
 
             if (window.GeneralMap) window.GeneralMap.getDrawingLayer().clearLayers();
@@ -347,8 +354,10 @@ window.Projects = (function () {
 
             notify(`Proyecto "${deletedName}" eliminado`, "success");
         } catch (err) {
-            console.error(err);
-            notify("Error eliminando proyecto", "error");
+            console.error("Delete Error:", err);
+            notify("Error eliminando proyecto: " + (err.message || "Error desconocido"), "error");
+        } finally {
+            isDeleting = false;
         }
     }
 

@@ -21,11 +21,26 @@ window.Api = {
             throw new Error(`Auth Error: ${res.status}`);
         }
 
-        if (!res.ok) throw new Error(`${options.method || 'GET'} ${url} -> ${res.status}`);
+        if (!res.ok) {
+            let errorDetail = "";
+            try {
+                const errorData = await res.json();
+                errorDetail = errorData.detail || errorData.message || JSON.stringify(errorData);
+            } catch (e) {
+                errorDetail = await res.text();
+            }
+            throw new Error(`HTTP ${res.status}: ${errorDetail || res.statusText}`);
+        }
 
-        // Handle empty responses (like from DELETE)
         const text = await res.text();
-        return text ? JSON.parse(text) : {};
+        if (!text) return {};
+
+        try {
+            return JSON.parse(text);
+        } catch (e) {
+            console.error("JSON parse error on response:", text);
+            return { text: text }; // Return as text if not JSON
+        }
     },
 
     async get(url) {
