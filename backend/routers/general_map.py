@@ -24,8 +24,9 @@ def get_district_projects(district_name: str, db: Session = Depends(get_db)):
     """Obtiene todos los proyectos de uno o más distritos."""
     district_list = get_district_list_from_param(district_name)
     
+    from sqlalchemy import func
     projects = db.query(models.Project).options(joinedload(models.Project.districts)).join(models.ProjectDistrict).filter(
-        models.ProjectDistrict.distrito_name.in_(district_list)
+        func.lower(models.ProjectDistrict.distrito_name).in_([d.lower() for d in district_list])
     ).distinct().order_by(models.Project.created_at.desc()).all()
     
     return projects
@@ -35,8 +36,9 @@ def get_district_stats(district_name: str, db: Session = Depends(get_db)):
     """Obtiene estadísticas de proyectos por distrito(s)."""
     district_list = get_district_list_from_param(district_name)
     
+    from sqlalchemy import func
     projects = db.query(models.Project).join(models.ProjectDistrict).filter(
-        models.ProjectDistrict.distrito_name.in_(district_list)
+        func.lower(models.ProjectDistrict.distrito_name).in_([d.lower() for d in district_list])
     ).distinct().all()
     
     total = len(projects)
