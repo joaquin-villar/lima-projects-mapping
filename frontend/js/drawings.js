@@ -34,6 +34,7 @@ window.Drawings = (function () {
 
     function handleKeyDown(e) {
         if (!selectedLayer || AppState.currentTab !== 'detail') return;
+        if (!window.Auth?.getToken()) return;
         if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) return;
 
         let latlng = null;
@@ -67,6 +68,12 @@ window.Drawings = (function () {
         const latSpan = document.getElementById('current-lat');
         const lngSpan = document.getElementById('current-lng');
 
+        // 🔐 SEGURIDAD: No mostrar el editor si no hay sesión
+        if (!window.Auth?.getToken()) {
+            if (editor) editor.style.display = 'none';
+            return;
+        }
+
         if (editor) editor.style.display = 'block';
         if (latSpan) latSpan.innerText = lat.toFixed(6);
         if (lngSpan) lngSpan.innerText = lng.toFixed(6);
@@ -86,7 +93,11 @@ window.Drawings = (function () {
 
         if (selectedLayer && typeof selectedLayer.getLatLng === 'function') {
             const ll = selectedLayer.getLatLng();
-            updateCoordinateEditor(ll.lat, ll.lng);
+
+            // 🔐 Solo actualizamos/mostramos el editor si estamos logeados
+            if (window.Auth?.getToken()) {
+                updateCoordinateEditor(ll.lat, ll.lng);
+            }
         }
     }
 
@@ -161,18 +172,20 @@ window.Drawings = (function () {
                                 }
                             });
 
-                            if (typeof layer.setDraggable === 'function') {
-                                layer.dragging.enable();
-                            } else if (layer instanceof L.Marker) {
-                                layer.options.draggable = true;
-                            }
+                            if (window.Auth?.getToken()) {
+                                if (typeof layer.setDraggable === 'function') {
+                                    layer.dragging.enable();
+                                } else if (layer instanceof L.Marker) {
+                                    layer.options.draggable = true;
+                                }
 
-                            // Sincronizar arrastre con el panel de coordenadas
-                            layer.on('dragstart', () => selectLayer(layer));
-                            layer.on('drag', (e) => {
-                                const ll = e.target.getLatLng();
-                                updateCoordinateEditor(ll.lat, ll.lng);
-                            });
+                                // Sincronizar arrastre con el panel de coordenadas
+                                layer.on('dragstart', () => selectLayer(layer));
+                                layer.on('drag', (e) => {
+                                    const ll = e.target.getLatLng();
+                                    updateCoordinateEditor(ll.lat, ll.lng);
+                                });
+                            }
 
                             layer.addTo(targetLayer);
                         });
