@@ -1,12 +1,79 @@
 // frontend/js/drawings.js
 window.Drawings = (function () {
 
+    let selectedLayer = null;
+
     // Helper para notificaciones (consistente con el resto de la app)
     function notify(message, type = 'success') {
         if (window.ProjectModal && typeof window.ProjectModal.showNotification === 'function') {
             window.ProjectModal.showNotification(message, type);
         } else {
             alert(message);
+        }
+    }
+
+    function init() {
+        window.addEventListener('keydown', handleKeyDown);
+    }
+
+    function handleKeyDown(e) {
+        if (!selectedLayer || AppState.currentTab !== 'detail') return;
+        if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) return;
+
+        let latlng = null;
+        if (typeof selectedLayer.getLatLng === 'function') {
+            latlng = selectedLayer.getLatLng();
+        }
+
+        if (!latlng) return;
+
+        const step = e.shiftKey ? 0.0005 : 0.00005;
+        let newLat = latlng.lat;
+        let newLng = latlng.lng;
+
+        if (e.key === 'ArrowUp') newLat += step;
+        else if (e.key === 'ArrowDown') newLat -= step;
+        else if (e.key === 'ArrowLeft') newLng -= step;
+        else if (e.key === 'ArrowRight') newLng += step;
+
+        e.preventDefault();
+        selectedLayer.setLatLng([newLat, newLng]);
+        updateCoordinateEditor(newLat, newLng);
+
+        // Si el layer tiene tooltip, forzar su actualización de posición
+        if (selectedLayer.getTooltip()) {
+            selectedLayer.setTooltipContent(selectedLayer.getTooltip().getContent());
+        }
+    }
+
+    function updateCoordinateEditor(lat, lng) {
+        const editor = document.getElementById('coordinate-editor');
+        const latSpan = document.getElementById('current-lat');
+        const lngSpan = document.getElementById('current-lng');
+
+        if (editor) editor.style.display = 'block';
+        if (latSpan) latSpan.innerText = lat.toFixed(6);
+        if (lngSpan) lngSpan.innerText = lng.toFixed(6);
+    }
+
+    function selectLayer(layer) {
+        // Limpieza visual previa si fuera necesaria
+        if (selectedLayer && selectedLayer.getElement) {
+            const el = selectedLayer.getElement();
+            if (el && el.firstChild) el.firstChild.style.boxShadow = "0 0 4px rgba(0,0,0,0.5)";
+        }
+
+        selectedLayer = layer;
+
+        // Resaltar el seleccionado
+        if (selectedLayer && selectedLayer.getElement) {
+            const el = selectedLayer.getElement();
+            if (el && el.firstChild) el.firstChild.style.boxShadow = "0 0 0 4px #38bdf8";
+        }
+
+        if (selectedLayer && typeof selectedLayer.getLatLng === 'function') {
+            const ll = selectedLayer.getLatLng();
+            updateCoordinateEditor(ll.lat, ll.lng);
         }
     }
 
@@ -31,6 +98,19 @@ window.Drawings = (function () {
                             fillOpacity: 0.2
                         },
                         pointToLayer: (feature, latlng) => {
+                            // 🟢 MODO EDICIÓN: Usamos Marker estándar con un DivIcon personalizado.
+                            // Leaflet.draw maneja mucho mejor el drag de Markers que de circleMarkers.
+                            if (targetLayer instanceof L.FeatureGroup) {
+                                return L.marker(latlng, {
+                                    icon: L.divIcon({
+                                        className: 'custom-div-icon',
+                                        html: `<div style="background-color: #22c55e; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.5);"></div>`,
+                                        iconSize: [14, 14],
+                                        iconAnchor: [7, 7]
+                                    })
+                                });
+                            }
+
                             return L.circleMarker(latlng, {
                                 radius: isHighlighted ? 10 : 7,
                                 fillColor: isHighlighted ? "#22c55e" : "#00B4D8",
@@ -44,10 +124,43 @@ window.Drawings = (function () {
 
                     geoLayer.bindTooltip(`<strong>${p.name}</strong><br>${p.status}`, {
                         sticky: true,
+                        interactive: false, // 🟢 IMPORTANTE: No interceptar clics/drags
                         className: 'custom-tooltip'
                     });
 
-                    geoLayer.addTo(targetLayer);
+                    // 🟢 MODO EDICIÓN: Si el targetLayer es un FeatureGroup (capa de dibujo), 
+                    // extraemos los sub-layers para que Leaflet.draw los reconozca individualmente.
+                    if (targetLayer instanceof L.FeatureGroup) {
+                        geoLayer.eachLayer(layer => {
+                            // Copiar el tooltip a la subcapa si existe
+                            if (geoLayer.getTooltip()) {
+                                layer.bindTooltip(geoLayer.getTooltip().getContent(), geoLayer.options);
+                            }
+
+                            // 🟢 Hacer seleccionable para edición con teclado Y arrastrable con mouse
+                            layer.on('click', (e) => {
+                                L.DomEvent.stopPropagation(e);
+                                selectLayer(layer);
+                            });
+
+                            if (typeof layer.setDraggable === 'function') {
+                                layer.dragging.enable();
+                            } else if (layer instanceof L.Marker) {
+                                layer.options.draggable = true;
+                            }
+
+                            // Sincronizar arrastre con el panel de coordenadas
+                            layer.on('dragstart', () => selectLayer(layer));
+                            layer.on('drag', (e) => {
+                                const ll = e.target.getLatLng();
+                                updateCoordinateEditor(ll.lat, ll.lng);
+                            });
+
+                            layer.addTo(targetLayer);
+                        });
+                    } else {
+                        geoLayer.addTo(targetLayer);
+                    }
 
                     // Si estamos cargando un solo proyecto resaltado, centrar el mapa
                     if (isHighlighted && options.fitBounds !== false) {
@@ -79,7 +192,10 @@ window.Drawings = (function () {
             const project = await Api.get(`/api/projects/${projectId}`);
             if (!project) return;
 
-            renderProjects([project], detailLayer, { clear: true, highlightId: projectId });
+            const detailLayer = window.DistrictMap?.getDrawingLayer();
+            if (detailLayer) {
+                renderProjects([project], detailLayer, { clear: true, highlightId: projectId });
+            }
 
         } catch (err) {
             console.error(err);
@@ -114,36 +230,42 @@ window.Drawings = (function () {
         // 3. Guardado
         try {
             // Usamos el endpoint Batch que creamos en el backend
+            // El batch endpoint REEMPLAZA todos los dibujos del proyecto.
             const payload = {
-                drawings: layersGeoJSON.features.map(feature => ({
-                    geojson: feature,
-                    drawing_type: feature.geometry.type
-                }))
+                drawings: layersGeoJSON.features.map(feature => {
+                    // Limpiamos propiedades extras que añade Leaflet al exportar
+                    const cleanFeature = {
+                        type: "Feature",
+                        geometry: feature.geometry,
+                        properties: {}
+                    };
+
+                    return {
+                        geojson: cleanFeature,
+                        drawing_type: feature.geometry.type.toLowerCase()
+                    };
+                })
             };
-
-            // Primero borramos los anteriores (estrategia simple de reemplazo)
-            // Opcional: Si tu backend batch no borra, podrías necesitar limpiar antes.
-            // Asumiremos que el usuario quiere guardar LO QUE VE.
-            // Si tu backend solo agrega, esto duplicará.
-            // Para un MVP de dibujo, lo ideal es: Borrar todo lo del proyecto -> Insertar lo nuevo.
-
-            // Nota: Como tu backend actual solo tiene "add", vamos a asumir adición
-            // O implementar una lógica de "replace" en el futuro.
 
             await Api.post(`/api/projects/${project.id}/drawings/batch`, payload);
 
             notify(`Dibujos guardados exitosamente en "${project.name}"`, "success");
 
+            // Opcional: Recargar el proyecto en el estado local si es necesario
+            if (window.Projects && typeof window.Projects.loadProjects === 'function') {
+                await window.Projects.loadProjects();
+            }
+
         } catch (err) {
             console.error(err);
-            // Only show error if it wasn't already handled by the API auth interceptor
             if (!err.message.includes('Auth Error')) {
-                notify("Error guardando dibujos", "error");
+                notify("Error guardando dibujos. Revisa tu conexión o permisos.", "error");
             }
         }
     }
 
     return {
+        init,
         loadProjectDrawings,
         saveCurrentDrawings,
         renderProjects

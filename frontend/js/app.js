@@ -18,9 +18,10 @@ async function initApp() {
 
         if (window.UI) UI.renderOverviewDistricts();
 
-        // 2. Inicializar Mapas
+        // 2. Inicializar Mapas y Dibujos
         if (window.GeneralMap) GeneralMap.init(geojson);
         if (window.DistrictMap) DistrictMap.init();
+        if (window.Drawings) Drawings.init();
 
         // 3. Inicializar UI
         if (window.UI) UI.init();
@@ -34,7 +35,7 @@ async function initApp() {
         // Custom event listener para la creación de proyectos desde el Modal
         document.addEventListener('projectModalSubmit', async function (e) {
             const data = e.detail;
-            
+
             try {
                 const newProject = await Api.post("/api/projects", {
                     name: data.name,
@@ -45,7 +46,7 @@ async function initApp() {
 
                 await Projects.loadProjectsForCurrentDistrict();
                 await Projects.loadProject(newProject.id);
-                
+
                 // Notificación de éxito (Opcional, si ProjectModal lo soporta)
                 if (window.ProjectModal && window.ProjectModal.showNotification) {
                     window.ProjectModal.showNotification(`Proyecto "${data.name}" creado`, 'success');

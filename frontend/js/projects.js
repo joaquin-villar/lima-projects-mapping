@@ -272,24 +272,20 @@ window.Projects = (function () {
 
                         // Volver a renderizar todos en azul
                         if (window.Drawings) {
-                            Drawings.renderProjects(projects, window.DistrictMap?.getDrawingLayer(), { clear: true });
+                            const detailLayer = window.DistrictMap?.getDrawingLayer();
+                            Drawings.renderProjects(projects, detailLayer, { clear: true });
                         }
                     } else {
                         // --- CASO SELECCIONAR ---
                         el.classList.add("active");
                         const projectId = parseInt(el.dataset.id);
 
-                        // Resaltar el seleccionado en verde
-                        if (window.Drawings) {
-                            Drawings.renderProjects(projects, window.DistrictMap?.getDrawingLayer(), { clear: true, highlightId: projectId });
-                        }
-
                         try {
                             currentProject = await Api.get(`/api/projects/${projectId}`);
 
-                            // Cargamos dibujos
+                            // Cargamos dibujos (Modo Edición: loadProjectDrawings se encarga de todo)
                             if (window.Drawings) {
-                                Drawings.loadProjectDrawings(el.dataset.id);
+                                await Drawings.loadProjectDrawings(projectId);
                             }
                         } catch (e) {
                             console.error("Error al seleccionar proyecto", e);
