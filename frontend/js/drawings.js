@@ -12,6 +12,16 @@ window.Drawings = (function () {
         }
     }
 
+    function getStatusColor(status) {
+        switch (status) {
+            case 'active': return '#22c55e'; // Green
+            case 'inactive': return '#f97316'; // Orange
+            case 'archived': return '#ef4444'; // Red
+            case 'completed': return '#3b82f6'; // Blue
+            default: return '#00B4D8'; // Default Blue
+        }
+    }
+
     function init() {
         window.addEventListener('keydown', handleKeyDown);
 
@@ -109,6 +119,7 @@ window.Drawings = (function () {
 
         projects.forEach(p => {
             const isHighlighted = p.id === highlightId;
+            const statusColor = getStatusColor(p.status);
 
             p.drawings.forEach(d => {
                 try {
@@ -116,19 +127,18 @@ window.Drawings = (function () {
 
                     const geoLayer = L.geoJSON(geo, {
                         style: {
-                            color: isHighlighted ? "#22c55e" : "#00B4D8",
-                            weight: isHighlighted ? 5 : 3,
+                            color: statusColor,
+                            weight: isHighlighted ? 6 : 3,
                             opacity: 1,
                             fillOpacity: 0.2
                         },
                         pointToLayer: (feature, latlng) => {
                             // 🟢 MODO EDICIÓN: Usamos Marker estándar con un DivIcon personalizado.
-                            // Leaflet.draw maneja mucho mejor el drag de Markers que de circleMarkers.
                             if (targetLayer instanceof L.FeatureGroup) {
                                 return L.marker(latlng, {
                                     icon: L.divIcon({
                                         className: 'custom-div-icon',
-                                        html: `<div style="background-color: #22c55e; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.5);"></div>`,
+                                        html: `<div style="background-color: ${statusColor}; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 0 ${isHighlighted ? '4px' : '2px'} ${isHighlighted ? '#3b82f6' : 'rgba(0,0,0,0.5)'};"></div>`,
                                         iconSize: [14, 14],
                                         iconAnchor: [7, 7]
                                     })
@@ -137,9 +147,9 @@ window.Drawings = (function () {
 
                             return L.circleMarker(latlng, {
                                 radius: isHighlighted ? 10 : 7,
-                                fillColor: isHighlighted ? "#22c55e" : "#00B4D8",
-                                color: "#fff",
-                                weight: 2,
+                                fillColor: statusColor,
+                                color: isHighlighted ? "#3b82f6" : "#fff", // Borde azul si está resaltado
+                                weight: isHighlighted ? 4 : 2,
                                 opacity: 1,
                                 fillOpacity: 0.8
                             });
