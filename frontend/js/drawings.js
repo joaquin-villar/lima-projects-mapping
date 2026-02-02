@@ -14,6 +14,22 @@ window.Drawings = (function () {
 
     function init() {
         window.addEventListener('keydown', handleKeyDown);
+
+        // 🟢 Listener global en los mapas para deseleccionar al hacer clic afuera
+        if (window.mapOverview) window.mapOverview.on('click', deselectLayer);
+        if (window.mapDetail) window.mapDetail.on('click', deselectLayer);
+    }
+
+    function deselectLayer() {
+        if (selectedLayer && selectedLayer.getElement) {
+            const el = selectedLayer.getElement();
+            if (el && el.firstChild) el.firstChild.style.boxShadow = "0 0 4px rgba(0,0,0,0.5)";
+        }
+        selectedLayer = null;
+
+        const editor = document.getElementById('coordinate-editor');
+        if (editor) editor.style.display = 'none';
+        console.log("Punto deseleccionado");
     }
 
     function handleKeyDown(e) {
@@ -57,11 +73,8 @@ window.Drawings = (function () {
     }
 
     function selectLayer(layer) {
-        // Limpieza visual previa si fuera necesaria
-        if (selectedLayer && selectedLayer.getElement) {
-            const el = selectedLayer.getElement();
-            if (el && el.firstChild) el.firstChild.style.boxShadow = "0 0 4px rgba(0,0,0,0.5)";
-        }
+        // Limpieza visual previa 
+        deselectLayer();
 
         selectedLayer = layer;
 
