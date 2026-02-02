@@ -67,11 +67,11 @@ window.UI = (function () {
            District tab actions - MODAL INTEGRATION
         ---------------------------- */
         document.getElementById("btn-new-project-in-district")?.addEventListener("click", () => {
-            
+
             if (AppState.selectedDistrict) {
                 // 🟢 AHORA: Pasamos la selección completa directamente.
                 // El modal.js ya sabe cómo leer "Lima, Callao" y marcar ambos en el select.
-                
+
                 if (window.ProjectModal && typeof window.ProjectModal.open === 'function') {
                     window.ProjectModal.open(AppState.selectedDistrict);
                 } else {
@@ -86,7 +86,7 @@ window.UI = (function () {
                 } else {
                     alert("Por favor seleccione al menos un distrito");
                 }
-                
+
                 // Redirigir al mapa general con un pequeño delay
                 setTimeout(() => {
                     switchTab("overview");
@@ -101,14 +101,14 @@ window.UI = (function () {
         // Renderizar lista inicial de distritos en el sidebar de overview
         // (Se llama también desde app.js al cargar geojson, pero por si acaso)
         if (AppState.districtsGeoJSON) {
-             renderOverviewDistricts();
+            renderOverviewDistricts();
         }
 
         /* ----------------------------
            Initialize UI state
         ---------------------------- */
         updateSidebarForTab("overview");
-        
+
         // Resize handler para recalcular grid expansion
         window.addEventListener('resize', () => {
             const currentProject = window.Projects?.getCurrentProject();
@@ -136,7 +136,7 @@ window.UI = (function () {
                 </div>
             `).join("");
         }
-        
+
         // 2. Poblar select oculto (Legacy Project Tab) si está vacío
         if (districtSelect && districtSelect.options.length === 0) {
             districtSelect.innerHTML = names
@@ -182,17 +182,19 @@ window.UI = (function () {
                 window.mapOverview?.invalidateSize();
             } else if (tab === "detail") {
                 window.mapDetail?.invalidateSize();
-                
+
                 if (AppState.selectedDistrict) {
                     window.DistrictMap?.focusOnSelectedDistrict();
-                    window.Projects?.loadProjectsForCurrentDistrict();
                     showDistrictStats(AppState.selectedDistrict);
                 } else {
-                    showDistrictPrompt();
-                    // Limpiar stats si no hay distrito
+                    // Si no hay distrito, simplemente limpiamos la máscara y stats, 
+                    // pero dejamos que Projects.loadProjectsForCurrentDistrict cargue todo.
+                    if (window.DistrictMap) window.DistrictMap.focusOnSelectedDistrict();
                     const statsContainer = document.getElementById("district-stats-container");
-                    if(statsContainer) statsContainer.innerHTML = "";
+                    if (statsContainer) statsContainer.innerHTML = "";
                 }
+
+                window.Projects?.loadProjectsForCurrentDistrict();
             }
         }, 150);
 
@@ -204,24 +206,27 @@ window.UI = (function () {
         const districtProjectsSection = document.getElementById("district-projects-section");
         const newProjectSection = document.getElementById("new-project-section");
 
-        if(overviewSection) overviewSection.style.display = "none";
-        if(districtProjectsSection) districtProjectsSection.style.display = "none";
-        if(newProjectSection) newProjectSection.style.display = "none";
+        if (overviewSection) overviewSection.style.display = "none";
+        if (districtProjectsSection) districtProjectsSection.style.display = "none";
+        if (newProjectSection) newProjectSection.style.display = "none";
 
         if (tab === "overview") {
-            if(overviewSection) overviewSection.style.display = "block";
+            if (overviewSection) overviewSection.style.display = "block";
         }
         else if (tab === "projects") {
-            if(newProjectSection) newProjectSection.style.display = "block";
+            if (newProjectSection) newProjectSection.style.display = "block";
         }
         else if (tab === "detail") {
-            if(districtProjectsSection) districtProjectsSection.style.display = "block";
-            
+            if (districtProjectsSection) districtProjectsSection.style.display = "block";
+
+            // 🟢 Cargamos proyectos (todos o por distrito)
+            window.Projects?.loadProjectsForCurrentDistrict();
+
             if (AppState.selectedDistrict) {
-                window.Projects?.loadProjectsForCurrentDistrict();
                 showDistrictStats(AppState.selectedDistrict);
             } else {
-                showDistrictPrompt();
+                const statsContainer = document.getElementById("district-stats-container");
+                if (statsContainer) statsContainer.innerHTML = "";
             }
         }
     }
@@ -231,13 +236,13 @@ window.UI = (function () {
         const s2 = document.getElementById("detail-district-display");
 
         const rawValue = AppState.selectedDistrict;
-        
+
         // Highlight visual en la lista de overview
         const cards = document.querySelectorAll(".district-mini-card");
         cards.forEach(c => c.classList.remove("active"));
-        
+
         if (rawValue) {
-            const selectedArr = rawValue.includes(",") ? rawValue.split(",").map(s=>s.trim()) : [rawValue];
+            const selectedArr = rawValue.includes(",") ? rawValue.split(",").map(s => s.trim()) : [rawValue];
             selectedArr.forEach(name => {
                 // Buscar tarjeta por texto (simplificado)
                 // Nota: Iteramos para encontrar el div que contiene el texto
@@ -248,10 +253,10 @@ window.UI = (function () {
         }
 
         const generatePills = (value) => {
-            if (!value) return '<span style="color: #64748b; font-size: 14px;">Ninguno</span>';
+            if (!value) return '<span style="color: #64748b; font-size: 14px;">Todos los proyectos (Lima & Callao)</span>';
 
-            const districts = value.includes(",") 
-                ? value.split(",").map(d => d.trim()).sort() 
+            const districts = value.includes(",")
+                ? value.split(",").map(d => d.trim()).sort()
                 : [value];
 
             const pillsHTML = districts.map(d => `
@@ -274,8 +279,8 @@ window.UI = (function () {
     function showDistrictPrompt() {
         const listDiv = document.getElementById("district-projects-list");
         const statsDiv = document.getElementById("district-stats-container");
-        
-        if(statsDiv) statsDiv.innerHTML = "";
+
+        if (statsDiv) statsDiv.innerHTML = "";
 
         if (listDiv) {
             listDiv.innerHTML = `
@@ -292,9 +297,9 @@ window.UI = (function () {
     async function showDistrictStats(districtName) {
         let statsDiv = document.getElementById("district-stats-container");
         const listDiv = document.getElementById("district-projects-list");
-        
-        if (listDiv && listDiv.querySelector('.info-box')) listDiv.innerHTML = ''; 
-        
+
+        if (listDiv && listDiv.querySelector('.info-box')) listDiv.innerHTML = '';
+
         if (!statsDiv && listDiv) {
             statsDiv = document.createElement("div");
             statsDiv.id = "district-stats-container";

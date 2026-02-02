@@ -217,24 +217,31 @@ window.Projects = (function () {
        PROJECTS FOR CURRENT DISTRICT (Detail tab)
        🟢 ACTUALIZADO CON LÓGICA DE TOGGLE
     --------------------------------------------------------- */
-    async function loadProjectsForCurrentDistrict() {
-        if (!AppState.selectedDistrict) return;
-
+    async function loadProjectsForCurrentDistrict(highlightId = null) {
         try {
-            const encoded = encodeURIComponent(AppState.selectedDistrict);
-            const projects = await Api.get(`/api/districts/${encoded}/projects`);
+            let projects;
             const listDiv = document.getElementById("district-projects-list");
+
+            if (!AppState.selectedDistrict) {
+                // 🟢 Si no hay distrito, cargamos TODOS los proyectos
+                projects = await Api.get("/api/projects");
+            } else {
+                const encoded = encodeURIComponent(AppState.selectedDistrict);
+                projects = await Api.get(`/api/districts/${encoded}/projects`);
+            }
 
             if (!projects.length) {
                 listDiv.innerHTML = `
                     <div class="info-box" style="margin-top: 10px;">
-                        No hay proyectos en este distrito
+                        No hay proyectos ${AppState.selectedDistrict ? "en este distrito" : "disponibles"}
                     </div>`;
+
+                if (window.DistrictMap) window.DistrictMap.getDrawingLayer().clearLayers();
                 return;
             }
 
             listDiv.innerHTML = projects.map(p => `
-                <div class="project-card" data-id="${p.id}">
+                <div class="project-card ${highlightId === p.id ? "active" : ""}" data-id="${p.id}">
                     <div class="project-name">${escapeHTML(p.name)}</div>
                     <div class="project-description">${escapeHTML(p.description || "")}</div>
                     <div class="project-meta">
@@ -243,10 +250,14 @@ window.Projects = (function () {
                 </div>
             `).join("");
 
-            // 🟢 NUEVO: Renderizar dibujos de TODOS los proyectos del distrito en los mapas
+            // 🟢 Renderizar dibujos de TODOS los proyectos, resaltando el seleccionado si existe
             if (window.Drawings) {
                 const detailLayer = window.DistrictMap?.getDrawingLayer();
-                Drawings.renderProjects(projects, detailLayer, { clear: true });
+                Drawings.renderProjects(projects, detailLayer, {
+                    clear: true,
+                    highlightId: highlightId,
+                    fitBounds: highlightId ? true : false // Solo centrar si hay selección
+                });
             }
 
             // Seleccionamos todas las tarjetas recién creadas
@@ -254,42 +265,18 @@ window.Projects = (function () {
 
             cards.forEach(el => {
 
-                // 🟢 1. UN SOLO CLICK: Toggle (Seleccionar / Deseleccionar)
                 el.addEventListener("click", async () => {
-                    // Comprobamos si esta tarjeta YA estaba activa
+                    const projectId = parseInt(el.dataset.id);
                     const isAlreadyActive = el.classList.contains("active");
-
-                    // A. Limpieza General: Quitamos active de todos y limpiamos mapas
-                    cards.forEach(c => c.classList.remove("active"));
-
-                    // Limpiar capas de dibujo inmediatamente para evitar confusión visual
-                    if (window.DistrictMap) window.DistrictMap.getDrawingLayer().clearLayers();
 
                     if (isAlreadyActive) {
                         // --- CASO DESELECCIONAR ---
                         console.log("Proyecto deseleccionado");
-                        currentProject = null;
-
-                        // Volver a renderizar todos en azul
-                        if (window.Drawings) {
-                            const detailLayer = window.DistrictMap?.getDrawingLayer();
-                            Drawings.renderProjects(projects, detailLayer, { clear: true });
-                        }
+                        await loadProjectsForCurrentDistrict(null);
                     } else {
                         // --- CASO SELECCIONAR ---
-                        el.classList.add("active");
-                        const projectId = parseInt(el.dataset.id);
-
-                        try {
-                            currentProject = await Api.get(`/api/projects/${projectId}`);
-
-                            // Cargamos dibujos (Modo Edición: loadProjectDrawings se encarga de todo)
-                            if (window.Drawings) {
-                                await Drawings.loadProjectDrawings(projectId);
-                            }
-                        } catch (e) {
-                            console.error("Error al seleccionar proyecto", e);
-                        }
+                        console.log("Seleccionando proyecto:", projectId);
+                        await loadProjectsForCurrentDistrict(projectId);
                     }
                 });
 
@@ -406,22 +393,17 @@ window.Projects = (function () {
         if (window.DistrictMap) window.DistrictMap.getDrawingLayer().clearLayers();
     }
 
-    function viewProjectOnMap() {
+    async function viewProjectOnMap() {
         if (!currentProject) return;
 
-        if (currentProject.districts && currentProject.districts.length > 0) {
-            if (window.GeneralMap) {
-                window.GeneralMap.deselectAll(false);
-                currentProject.districts.forEach(distrito => {
-                    window.GeneralMap.toggleDistrict(distrito);
-                });
-            }
-            if (window.UI) UI.switchTab("detail");
-            const distStr = currentProject.districts.join(", ");
-            notify(`Visualizando ${currentProject.name} en: ${distStr} `, "success");
-        } else {
-            notify("Este proyecto no tiene distritos asignados", "error");
-        }
+        // 1. Cambiamos a la pestaña de detalle
+        if (window.UI) await UI.switchTab("detail");
+
+        // 2. Cargamos la vista detallada resaltando este proyecto
+        // No forzamos la selección de distritos, así que se mostrarán TODOS
+        await loadProjectsForCurrentDistrict(currentProject.id);
+
+        notify(`Visualizando "${currentProject.name}" en el mapa`, "success");
     }
 
     return {
