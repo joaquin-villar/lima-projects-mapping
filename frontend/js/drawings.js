@@ -154,6 +154,11 @@ window.Drawings = (function () {
                             layer.on('click', (e) => {
                                 L.DomEvent.stopPropagation(e);
                                 selectLayer(layer);
+
+                                // 🟢 Sincronizar con el sidebar (buscamos la tarjeta y hacemos scroll)
+                                if (window.Projects && typeof window.Projects.selectProjectById === 'function') {
+                                    window.Projects.selectProjectById(p.id, { scroll: true, updateMap: false });
+                                }
                             });
 
                             if (typeof layer.setDraggable === 'function') {

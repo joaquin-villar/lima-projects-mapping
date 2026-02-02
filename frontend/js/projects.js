@@ -399,11 +399,50 @@ window.Projects = (function () {
         // 1. Cambiamos a la pestaña de detalle
         if (window.UI) await UI.switchTab("detail");
 
-        // 2. Cargamos la vista detallada resaltando este proyecto
-        // No forzamos la selección de distritos, así que se mostrarán TODOS
-        await loadProjectsForCurrentDistrict(currentProject.id);
+        // 2. Seleccionamos y centramos
+        await selectProjectById(currentProject.id, { scroll: true, updateMap: true });
 
         notify(`Visualizando "${currentProject.name}" en el mapa`, "success");
+    }
+
+    /* ---------------------------------------------------------
+       BIDIRECTIONAL SYNC (Map -> Sidebar)
+    --------------------------------------------------------- */
+    async function selectProjectById(projectId, options = {}) {
+        const { scroll = true, updateMap = true } = options;
+
+        // A. Actualizar estado interno
+        if (!currentProject || currentProject.id !== projectId) {
+            try {
+                currentProject = await Api.get(`/api/projects/${projectId}`);
+            } catch (e) {
+                console.error("Error fetching project for sync", e);
+            }
+        }
+
+        // B. Actualizar visualmente la lista lateral
+        const cards = document.querySelectorAll("#district-projects-list .project-card");
+        let targetCard = null;
+
+        cards.forEach(card => {
+            if (parseInt(card.dataset.id) === projectId) {
+                card.classList.add("active");
+                targetCard = card;
+            } else {
+                card.classList.remove("active");
+            }
+        });
+
+        // C. Scroll suave a la tarjeta
+        if (scroll && targetCard) {
+            targetCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // D. Resaltar en el mapa si se solicita
+        if (updateMap && window.Drawings && currentProject) {
+            // Nota: Aquí preferimos Drawings.loadProjectDrawings ya que maneja el resaltado y centrado
+            await Drawings.loadProjectDrawings(projectId);
+        }
     }
 
     return {
@@ -417,6 +456,7 @@ window.Projects = (function () {
         getCurrentProject: () => currentProject,
 
         viewProjectOnMap,
+        selectProjectById,
         closeProjectDetails
     };
 })();
